@@ -17,22 +17,6 @@ namespace DiAnterExpress.Data
             _db = db;
         }
 
-        public async Task<Shipment> Delete(int id)
-        {
-            var result = await GetById(id);
-            if (result == null) throw new Exception("Data tidak ditemukan!");
-            try
-            {
-                _db.Shipments.Remove(result);
-                await _db.SaveChangesAsync();
-                return result;
-            }
-            catch (DbUpdateException dbEx)
-            {
-                throw new Exception($"Error: {dbEx.Message}");
-            }
-        }
-
         public async Task<IEnumerable<Shipment>> GetAll()
         {
             var results = await _db.Shipments.ToListAsync();
@@ -56,44 +40,20 @@ namespace DiAnterExpress.Data
             var fee = (distance * costPerKm) + (input.Weight * costPerKg);
             return Task.FromResult(fee);
         }
-
-        public async Task<Shipment> Insert(Shipment obj)
+        
+        Task<Shipment> ICrud<Shipment>.Delete(int id)
         {
-            try
-            {
-                _db.Shipments.Add(obj);
-                await _db.SaveChangesAsync();
-                return obj;
-            }
-            catch (DbUpdateException dbEx)
-            {
-                throw new Exception($"Error: {dbEx.Message}");
-            }
+            throw new NotImplementedException();
         }
 
-
-        public async Task<Shipment> Update(int id, Shipment obj)
+        Task<Shipment> ICrud<Shipment>.Insert(Shipment obj)
         {
-            try
-            {
-                var result = await GetById(id);
-                result.SenderName = obj.SenderName;
-                result.SenderContact = obj.SenderContact;
-                result.SenderAddress = obj.SenderAddress;
-                result.ReceiverName = obj.ReceiverName;
-                result.ReceiverContact = obj.ReceiverContact;
-                result.ReceiverAddress = obj.ReceiverAddress;
-                result.TotalWeight = obj.TotalWeight;
-                result.Cost = obj.Cost;
-                result.SenderAddress = obj.SenderAddress;
-                await _db.SaveChangesAsync();
-                obj.Id = Convert.ToInt32(id);
-                return obj;
-            }
-            catch (DbUpdateException dbEx)
-            {
-                throw new Exception($"Error: {dbEx.Message}");
-            }
+            throw new NotImplementedException();
+        }
+
+        Task<Shipment> ICrud<Shipment>.Update(int id, Shipment obj)
+        {
+            throw new NotImplementedException();
         }
     }
 }
