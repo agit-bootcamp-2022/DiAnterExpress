@@ -8,9 +8,11 @@ namespace DiAnterExpress.Data
 {
     public class DALShipmentType : IShipmentType
     {
-        public DALShipmentType()
-        {
+        private readonly ApplicationDbContext _context;
 
+        public DALShipmentType(ApplicationDbContext context)
+        {
+            _context = context;
         }
 
         public Task<ShipmentType> Delete(int id)
@@ -25,7 +27,8 @@ namespace DiAnterExpress.Data
 
         public Task<ShipmentType> GetById(int id)
         {
-            throw new NotImplementedException();
+            var result = _context.ShipmentTypes.Where(o => o.Id == id).FirstOrDefault();
+            return Task.FromResult(result);
         }
 
         public Task<ShipmentType> Insert(ShipmentType obj)
