@@ -1,44 +1,80 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
 
 namespace DiAnterExpress.Data
 {
     public class DALShipmentType : IShipmentType
     {
-        private readonly ApplicationDbContext _context;
 
-        public DALShipmentType(ApplicationDbContext context)
+        private ApplicationDbContext _db;
+
+        public DALShipmentType(ApplicationDbContext db)
         {
-            _context = context;
+            _db = db;
         }
 
-        public Task<ShipmentType> Delete(int id)
+        public async Task<ShipmentType> Delete(int id)
         {
-            throw new NotImplementedException();
+            var data = await _db.ShipmentTypes.Where(x => x.Id == id).FirstOrDefaultAsync();
+            if (data != null)
+            {
+                _db.ShipmentTypes.Remove(data);
+                await _db.SaveChangesAsync();
+            }
+            return data;
         }
 
-        public Task<IEnumerable<ShipmentType>> GetAll()
+        public async Task<IEnumerable<ShipmentType>> GetAll()
         {
-            throw new NotImplementedException();
+             var shipmentTypes = await _db.ShipmentTypes.OrderBy(x => x.Name).ToListAsync();
+             return shipmentTypes;
         }
 
-        public Task<ShipmentType> GetById(int id)
+        public async Task<ShipmentType> GetById(int id)
         {
-            var result = _context.ShipmentTypes.Where(o => o.Id == id).FirstOrDefault();
-            return Task.FromResult(result);
+            var  shipmentType = await _db.ShipmentTypes.SingleOrDefaultAsync(x => x.Id == id);
+            if (shipmentType == null)
+            {
+                throw new Exception("Id not found");
+            }
+            return shipmentType;
         }
 
-        public Task<ShipmentType> Insert(ShipmentType obj)
+        public async Task<ShipmentType> Insert(ShipmentType obj)
         {
-            throw new NotImplementedException();
+            var newShipmentTypes = new ShipmentType
+            {
+                Name = obj.Name,
+                CostPerKg = obj.CostPerKg,
+                CostPerKm = obj.CostPerKm,
+            };
+            _db.ShipmentTypes.Add(newShipmentTypes);
+            await _db.SaveChangesAsync();
+            return newShipmentTypes;
         }
 
-        public Task<ShipmentType> Update(int id, ShipmentType obj)
+        public async Task<ShipmentType> Update(int id, ShipmentType obj)
         {
-            throw new NotImplementedException();
+            var shipmentType = await _db.ShipmentTypes.Where(x => x.Id == id).FirstOrDefaultAsync();
+            if (shipmentType != null)
+            {
+                shipmentType.Name = obj.Name;
+                shipmentType.CostPerKg = obj.CostPerKg;
+                shipmentType.CostPerKm = obj.CostPerKm;
+
+            } else
+            {
+                throw new Exception($"Data with no id {id} is not found");
+            }
+            _db.ShipmentTypes.Update(shipmentType);
+            await _db.SaveChangesAsync();
+            return shipmentType;
+
         }
     }
 }
