@@ -1,22 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DiAnterExpress.Models
+namespace DiAnterExpress.Dtos
 {
-    public class Branch
+    public class BranchDto
     {
-        [Key]
         public int Id {get; set;}
-        [Required]
         public string Name {get; set;}
-        [Required]
         public string Address {get; set;}
-        [Required]
         public string City {get; set;}
-        [Required]
         public int Phone {get; set;}
     }
 }
