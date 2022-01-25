@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DiAnterExpress.Data;
+using DiAnterExpress.Migrations;
 using DiAnterExpress.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -66,6 +67,7 @@ namespace DiAnterExpress
             {
                 endpoints.MapControllers();
             });
+            DbInit.PrepPopulation(app);
         }
     }
 }
