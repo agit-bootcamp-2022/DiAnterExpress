@@ -76,14 +76,14 @@ namespace DiAnterExpress.Controllers
         {
             try
             {
-                await _branch.Delete(id);
-                return Ok($"Data student {id} berhasil didelete");
+                await _branch.DeleteById(id);
+                return Ok($"Data branch {id} berhasil didelete");
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
         }  
-        
+
     }
 }

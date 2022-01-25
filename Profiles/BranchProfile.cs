@@ -9,7 +9,8 @@ namespace DiAnterExpress.Profiles
     {
         public BranchProfile()
         {
-            CreateMap<Branch, Branch>();
+            CreateMap<Branch, BranchDto>();
+                   
             CreateMap<BranchCreateDto, Branch>();
         }
     }

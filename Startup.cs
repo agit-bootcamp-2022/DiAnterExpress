@@ -39,6 +39,9 @@ namespace DiAnterExpress
             services.AddScoped<IShipmentType, DALShipmentType>();
             services.AddScoped<ITransactionInternal, DALTransactionInternal>();
 
+            //AutoMapper
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
