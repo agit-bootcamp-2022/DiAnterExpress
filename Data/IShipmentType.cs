@@ -8,6 +8,6 @@ namespace DiAnterExpress.Data
 {
     public interface IShipmentType : ICrud<ShipmentType>
     {
-
+        
     }
 }
