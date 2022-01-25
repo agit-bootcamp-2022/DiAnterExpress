@@ -12,8 +12,6 @@ namespace DiAnterExpress.Data
 
             if (!context.Branches.Any())
             {
-                return;
-            }
 
             var branches = new Branch[]
             {
@@ -23,13 +21,14 @@ namespace DiAnterExpress.Data
                 new Branch{Name ="Di Anter Express Taman Mini",Address="Jln. Taman Mini Ruko No.22",City="Jakarta",Phone=0812345676},
                 new Branch{Name ="Di Anter Express Tanah Abang",Address="Jln. Tanah Abang Ruko No.23",City="Jakarta",Phone=0812345675}           
             };
-
+            
             foreach (var b in branches)
             {
                 context.Branches.Add(b);
-            }
-
-            context.SaveChanges();
+            } 
+                context.SaveChanges();
+                return;
+            }    
         }
     }
 }
