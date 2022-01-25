@@ -14,10 +14,13 @@ namespace DiAnterExpress.Controllers
     public class ShipmentController : ControllerBase
     {
         private readonly IShipmentType _shipmentType;
+        private readonly IShipment _shipment;
 
-        public ShipmentController(IShipmentType shipmentType)
+        public ShipmentController(IShipmentType shipmentType, 
+            IShipment shipment)
         {
             _shipmentType = shipmentType;
+            _shipment = shipment;
         }
 
         [HttpPost]
@@ -28,10 +31,7 @@ namespace DiAnterExpress.Controllers
                 var shipmentType = await _shipmentType.GetById(input.ShipmentTypeId);
                 if (shipmentType != null)
                 {
-                    var senderLoc = new Point(input.SenderAddress.Latitude, input.SenderAddress.Longitude) { SRID = 4326 };
-                    var receiverLoc = new Point(input.ReceiverAddress.Latitude, input.ReceiverAddress.Longitude) { SRID = 4326 };
-                    var distance = senderLoc.Distance(receiverLoc) / 1000;
-                    var fee = (distance * shipmentType.CostPerKm) + (input.Weight * shipmentType.CostPerKg);
+                    var fee = await _shipment.GetShipmentFee(input, shipmentType.CostPerKm, shipmentType.CostPerKg);
                     return Ok(new ShipmentFeeOutput
                     {
                         Fee = fee
