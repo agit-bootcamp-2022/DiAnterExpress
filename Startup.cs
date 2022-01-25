@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DiAnterExpress.Data;
+using DiAnterExpress.External.SyncDataService.Http;
 using DiAnterExpress.Migrations;
 using DiAnterExpress.Models;
 using Microsoft.AspNetCore.Builder;
@@ -39,6 +40,8 @@ namespace DiAnterExpress
             services.AddScoped<IShipment, DALShipment>();
             services.AddScoped<IShipmentType, DALShipmentType>();
             services.AddScoped<ITransactionInternal, DALTransactionInternal>();
+
+            services.AddHttpClient<IShipmentFeeClient, HttpShipmentFeeClient>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
