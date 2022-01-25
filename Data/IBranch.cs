@@ -8,6 +8,6 @@ namespace DiAnterExpress.Data
 {
     public interface IBranch : ICrud<Branch>
     {
-
+        Task DeleteById (int id);
     }
 }
