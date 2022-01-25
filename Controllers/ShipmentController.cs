@@ -29,7 +29,7 @@ namespace DiAnterExpress.Controllers
             _shipmentType = shipmentType;
             _shipment = shipment;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _http = http; 
+            _http = http;
             _transactionInternal = transactionInternal;
         }
 
@@ -155,6 +155,47 @@ namespace DiAnterExpress.Controllers
                 return NotFound();
 
             return Ok(_mapper.Map<DtoStatus>(result));
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<DtoShipmentCreateReturn>> CreateShipmentTokpod([FromBody] DtoShipmentCreateTokopodia input)
+        {
+            try
+            {
+                // TODO Use automapper instead of manually creating Shipment Object
+                var shipmentObj = new Shipment
+                {
+                    transactionId = input.transactionId,
+                    transactionType = TransactionType.Tokopodia,
+
+                    senderName = input.senderName,
+                    senderContact = input.senderContact,
+                    senderAddress = new Point(input.senderAddress.lat, input.senderAddress.lon) { SRID = 4326 },
+
+                    receiverName = input.receiverName,
+                    receiverContact = input.receiverContact,
+                    receiverAddress = new Point(input.receiverAddress.lat, input.receiverAddress.lon) { SRID = 4326 },
+
+                    totalWeight = input.totalWeight,
+                    status = Status.OrderReceived,
+                    shipmentTypeId = input.shipmentTypeId,
+                    branchId = 0,
+                };
+
+                var result = await _shipment.Insert(shipmentObj);
+
+                return Ok(
+                    new DtoShipmentCreateReturn
+                    {
+                        shipmentId = result.Id,
+                        statusOrder = result.status.ToString()
+                    }
+                );
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
