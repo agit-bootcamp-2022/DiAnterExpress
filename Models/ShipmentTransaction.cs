@@ -7,6 +7,6 @@ namespace DiAnterExpress.Models
 {
     public class ShipmentTransaction
     {
-        
+
     }
 }
