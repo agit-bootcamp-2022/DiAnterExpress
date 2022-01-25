@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DiAnterExpress.Data;
 using DiAnterExpress.Dtos;
-using DiAnterExpress.External.SyncDataService.Http;
 using Microsoft.AspNetCore.Mvc;
 using NetTopologySuite.Geometries;
 
@@ -13,11 +13,11 @@ namespace DiAnterExpress.Controllers
     [Route("api/v1/[controller]")]
     public class ShipmentController : ControllerBase
     {
-        private readonly IShipmentFeeClient _client;
+        private readonly IShipmentType _shipmentType;
 
-        public ShipmentController(IShipmentFeeClient client)
+        public ShipmentController(IShipmentType shipmentType)
         {
-            _client = client;
+            _shipmentType = shipmentType;
         }
 
         [HttpPost]
@@ -25,7 +25,7 @@ namespace DiAnterExpress.Controllers
         {
             try
             {
-                var shipmentType = await _client.GetFee(input.ShipmentTypeId);
+                var shipmentType = await _shipmentType.GetById(input.ShipmentTypeId);
                 if (shipmentType != null)
                 {
                     var senderLoc = new Point(input.SenderAddress.Latitude, input.SenderAddress.Longitude) { SRID = 4326 };
@@ -34,7 +34,6 @@ namespace DiAnterExpress.Controllers
                     var fee = (distance * shipmentType.CostPerKm) + (input.Weight * shipmentType.CostPerKg);
                     return Ok(new ShipmentFeeOutput
                     {
-                        Status = "Success",
                         Fee = fee
                     });
                 }
