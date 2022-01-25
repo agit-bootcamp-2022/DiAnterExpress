@@ -5,29 +5,47 @@ using System.Threading.Tasks;
 using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
 using NetTopologySuite.Geometries;
+using Microsoft.EntityFrameworkCore;
 
 namespace DiAnterExpress.Data
 {
     public class DALShipment : IShipment
     {
-        public DALShipment()
+        private ApplicationDbContext _db;
+        public DALShipment(ApplicationDbContext db)
         {
-
+            _db = db;
         }
 
-        public Task<Shipment> Delete(int id)
+        public async Task<Shipment> Delete(int id)
         {
-            throw new NotImplementedException();
+            var result = await GetById(id);
+            if (result == null) throw new Exception("Data tidak ditemukan!");
+            try
+            {
+                _db.Shipments.Remove(result);
+                await _db.SaveChangesAsync();
+                return result;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Error: {dbEx.Message}");
+            }
         }
 
-        public Task<IEnumerable<Shipment>> GetAll()
+        public async Task<IEnumerable<Shipment>> GetAll()
         {
-            throw new NotImplementedException();
+            var results = await _db.Shipments.ToListAsync();
+            return results;
         }
 
-        public Task<Shipment> GetById(int id)
+        public async Task<Shipment> GetById(int id)
         {
-            throw new NotImplementedException();
+            var result = await _db.Shipments.Where(s => s.Id == Convert.ToInt32(id)).SingleOrDefaultAsync<Shipment>();
+            if (result != null)
+                return result;
+            else
+                throw new Exception("Data tidak ditemukan !");
         }
 
         public Task<double> GetShipmentFee(ShipmentFeeInput input, double costPerKm, double costPerKg)
@@ -39,14 +57,43 @@ namespace DiAnterExpress.Data
             return Task.FromResult(fee);
         }
 
-        public Task<Shipment> Insert(Shipment obj)
+        public async Task<Shipment> Insert(Shipment obj)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _db.Shipments.Add(obj);
+                await _db.SaveChangesAsync();
+                return obj;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Error: {dbEx.Message}");
+            }
         }
 
-        public Task<Shipment> Update(int id, Shipment obj)
+
+        public async Task<Shipment> Update(int id, Shipment obj)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await GetById(id);
+                result.SenderName = obj.SenderName;
+                result.SenderContact = obj.SenderContact;
+                result.SenderAddress = obj.SenderAddress;
+                result.ReceiverName = obj.ReceiverName;
+                result.ReceiverContact = obj.ReceiverContact;
+                result.ReceiverAddress = obj.ReceiverAddress;
+                result.TotalWeight = obj.TotalWeight;
+                result.Cost = obj.Cost;
+                result.SenderAddress = obj.SenderAddress;
+                await _db.SaveChangesAsync();
+                obj.Id = Convert.ToInt32(id);
+                return obj;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Error: {dbEx.Message}");
+            }
         }
     }
 }

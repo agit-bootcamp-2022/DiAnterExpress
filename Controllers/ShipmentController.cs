@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using DiAnterExpress.Data;
 using DiAnterExpress.Dtos;
 using Microsoft.AspNetCore.Mvc;
@@ -15,12 +16,14 @@ namespace DiAnterExpress.Controllers
     {
         private readonly IShipmentType _shipmentType;
         private readonly IShipment _shipment;
+        private readonly IMapper _mapper;
 
         public ShipmentController(IShipmentType shipmentType, 
-            IShipment shipment)
+            IShipment shipment, IMapper mapper)
         {
             _shipmentType = shipmentType;
             _shipment = shipment;
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         [HttpPost]
@@ -46,6 +49,34 @@ namespace DiAnterExpress.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DtoShipmentOutput>>> GetAllShipment()
+        {
+            var result = await _shipment.GetAll();
+            var dtos = _mapper.Map<IEnumerable<DtoShipmentOutput>>(result);
+            return Ok(dtos);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<DtoShipmentOutput>> GetShipmentById(int id)
+        {
+            var result = await _shipment.GetById(id);
+            if (result == null)
+                return NotFound();
+
+            return Ok(_mapper.Map<DtoShipmentOutput>(result));
+        }
+
+        [HttpGet("{id}/Status")]
+        public async Task<ActionResult<DtoStatus>> GetShipmentStatus(int id)
+        {
+            var result = await _shipment.GetById(id);
+            if (result == null)
+                return NotFound();
+
+            return Ok(_mapper.Map<DtoStatus>(result));
         }
     }
 }
