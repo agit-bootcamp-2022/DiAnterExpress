@@ -43,7 +43,7 @@ namespace DiAnterExpress.Data
 
         public async Task<Branch> GetById(int id)
         {
-            var result = await _db.Branches.Where(s => s.Id == Convert.ToInt32(id)).SingleOrDefaultAsync<Branch>();
+            var result = await _db.Branches.Where(s => s.Id == id).SingleOrDefaultAsync<Branch>();
             if (result != null)
                 return result;
             else
@@ -74,7 +74,7 @@ namespace DiAnterExpress.Data
                 result.City = obj.City;
                 result.Phone = obj.Phone;
                 await _db.SaveChangesAsync();
-                obj.Id = Convert.ToInt32(id);
+                obj.Id = id;
                 return obj;
             }
             catch (DbUpdateException dbEx)
