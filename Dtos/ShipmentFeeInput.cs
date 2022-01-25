@@ -8,9 +8,15 @@ namespace DiAnterExpress.Dtos
 {
     public class ShipmentFeeInput
     {
-        public Point SenderAddress { get; set; }
-        public Point ReceiverAddress { get; set; }
+        public Location SenderAddress { get; set; }
+        public Location ReceiverAddress { get; set; }
         public double Weight { get; set; }
         public int ShipmentTypeId { get; set; }
+    }
+
+    public class Location
+    {
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
     }
 }
