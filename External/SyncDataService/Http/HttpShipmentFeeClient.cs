@@ -28,7 +28,6 @@ namespace DiAnterExpress.External.SyncDataService.Http
                 Console.WriteLine("--> Sync POST to Get Fee was OK !");
                 var content = await response.Content.ReadAsStringAsync();
                 ShipmentType value = JsonConvert.DeserializeObject<ShipmentType>(content);
-                Console.WriteLine(value.Name);
                 return value;
             }
             else
