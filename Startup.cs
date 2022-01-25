@@ -70,7 +70,6 @@ namespace DiAnterExpress
             {
                 endpoints.MapControllers();
             });
-            DbInit.PrepPopulation(app);
         }
     }
 }
