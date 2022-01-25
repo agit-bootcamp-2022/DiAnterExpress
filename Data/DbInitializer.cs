@@ -10,7 +10,7 @@ namespace DiAnterExpress.Data
         {
             context.Database.EnsureCreated();
 
-            if (context.Branches.Any())
+            if (!context.Branches.Any())
             {
                 return;
             }
