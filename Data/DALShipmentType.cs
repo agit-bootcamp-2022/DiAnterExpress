@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DiAnterExpress.Data
 {
@@ -37,7 +37,7 @@ namespace DiAnterExpress.Data
 
         public async Task<ShipmentType> GetById(int id)
         {
-            var  shipmentType = await _db.ShipmentTypes.SingleOrDefaultAsync(x => x.Id == id);
+            var  shipmentType = await _db.ShipmentTypes.Where(x => x.Id == id).FirstOrDefaultAsync();
             if (shipmentType == null)
             {
                 throw new Exception("Id not found");

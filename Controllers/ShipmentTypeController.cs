@@ -21,14 +21,23 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ShipmentType>>> GetAll()
+        public async Task<ActionResult<IEnumerable<ShipmentType>>> Get()
         {
-            var response = await _shipmentType.GetAll();
-            return Ok(response);
+            try
+            {
+                var response = await _shipmentType.GetAll();
+                return Ok(response);
+
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
         }
 
-        [HttpGet("{Id}")]
-        public async Task<ActionResult<ShipmentType>> GetById(int id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ShipmentType>> GetByIdCustomer(int id)
         {
             try
             {
