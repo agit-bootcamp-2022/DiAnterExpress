@@ -46,7 +46,7 @@ namespace DiAnterExpress.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { Status = 400, Messege = ex.Message });
+                return BadRequest(ex.Message);
             }
         }
 
@@ -67,7 +67,7 @@ namespace DiAnterExpress.Controllers
             catch (Exception ex)
             {
 
-                return BadRequest(new { Status = 400, Messege = ex.Message });
+                return BadRequest(ex.Message);
             }
         }
 
@@ -88,7 +88,7 @@ namespace DiAnterExpress.Controllers
             catch (Exception ex)
             {
 
-                return BadRequest(new { Status = 400, Messege = ex.Message });
+                return BadRequest(ex.Message);
             }
         }
 
@@ -103,7 +103,7 @@ namespace DiAnterExpress.Controllers
             catch (Exception ex)
             {
 
-                return BadRequest(new { Status = 400, Messege = ex.Message });
+                return BadRequest(ex.Message);
             }
         }
 
