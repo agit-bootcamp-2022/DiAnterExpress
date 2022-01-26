@@ -17,17 +17,16 @@ namespace DiAnterExpress.Controllers
     {
         private readonly IShipmentType _shipmentType;
         private readonly IShipment _shipment;
-        private readonly ITransactionInternal _transactionInternal;
         private readonly IMapper _mapper;
+        private readonly ITransactionInternal _transactionInternal;
 
         public ShipmentController(IShipmentType shipmentType,
-            IShipment shipment, ITransactionInternal transactionInternal,
-            IMapper mapper)
+            IShipment shipment, IMapper mapper, ITransactionInternal transactionInternal)
         {
             _shipmentType = shipmentType;
             _shipment = shipment;
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _transactionInternal = transactionInternal;
-            _mapper = mapper;
         }
 
         [HttpPost("GetShipmentFee")]
@@ -71,7 +70,7 @@ namespace DiAnterExpress.Controllers
                         ShipmentTypeId = input.ShipmentTypeId
                     };
                     var fee = await _shipment.GetShipmentFee(mapCost, shipmentType.CostPerKm, shipmentType.CostPerKg);
-                    
+
                     //HTTP POST UangTransId & fee TO UANGTRANS
                     //IF (RETURN FROM UANG TRANS == POSITIF) THEN DO FOLLOWING
 
@@ -117,6 +116,34 @@ namespace DiAnterExpress.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+        
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<DtoShipmentOutput>>> GetAllShipment()
+        {
+            var result = await _shipment.GetAll();
+            var dtos = _mapper.Map<IEnumerable<DtoShipmentOutput>>(result);
+            return Ok(dtos);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<DtoShipmentOutput>> GetShipmentById(int id)
+        {
+            var result = await _shipment.GetById(id);
+            if (result == null)
+                return NotFound();
+
+            return Ok(_mapper.Map<DtoShipmentOutput>(result));
+        }
+
+        [HttpGet("{id}/Status")]
+        public async Task<ActionResult<DtoStatus>> GetShipmentStatus(int id)
+        {
+            var result = await _shipment.GetById(id);
+            if (result == null)
+                return NotFound();
+
+            return Ok(_mapper.Map<DtoStatus>(result));
         }
     }
 }

@@ -12,7 +12,6 @@ namespace DiAnterExpress.Data
     public class DALShipment : IShipment
     {
         private ApplicationDbContext _db;
-
         public DALShipment(ApplicationDbContext db)
         {
             _db = db;
@@ -23,14 +22,19 @@ namespace DiAnterExpress.Data
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Shipment>> GetAll()
+        public async Task<IEnumerable<Shipment>> GetAll()
         {
-            throw new NotImplementedException();
+            var results = await _db.Shipments.ToListAsync();
+            return results;
         }
 
-        public Task<Shipment> GetById(int id)
+        public async Task<Shipment> GetById(int id)
         {
-            throw new NotImplementedException();
+            var result = await _db.Shipments.Where(s => s.Id == Convert.ToInt32(id)).SingleOrDefaultAsync<Shipment>();
+            if (result != null)
+                return result;
+            else
+                throw new Exception("Data tidak ditemukan !");
         }
 
         public Task<double> GetShipmentFee(ShipmentFeeInput input, double costPerKm, double costPerKg)
