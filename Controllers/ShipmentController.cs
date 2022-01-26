@@ -60,7 +60,6 @@ namespace DiAnterExpress.Controllers
         {
             try
             {
-
                 var mapCost = new ShipmentFeeInput  //map dulu biar getshipmentfee jalan
                 {
                     SenderAddress = input.SenderAddress,
@@ -68,22 +67,26 @@ namespace DiAnterExpress.Controllers
                     Weight = input.TotalWeight,
                     ShipmentTypeId = input.ShipmentTypeId
                 };
-                //var return = Http Post ke UangTrans, kirim UangTransId Bersangkutan dan cost.
+                var cost = await GetShipmentFee(mapCost); //get fee function
+                //var return = Http Post ke UangTrans, kirim UangTransId Bersangkutan dan costnya
                 // IF (return == positif)
                 // {
                 var transactionInternal = new TransactionInternal
                 {
                     Product = input.Product,
-                    PaymmentId = 0
+                    PaymmentId = 0 //nantinya bakal pakai paymentId yang direturn UangTrans
                 };
                 var transactionId = await _transactionInternal.Insert(transactionInternal); //insert new transactionInternal
+
                 var shipment = _mapper.Map<Shipment>(input);
-                shipment.Status = Status.OrderReceived; //Masih eksplisit, bisa masukin di profile mapper
-                shipment.BranchId = 0;
-                var cost = await GetShipmentFee(mapCost); //get fee function
+                Console.WriteLine(shipment.ReceiverContact.ToString());
+                Console.WriteLine(shipment.ReceiverAddress.ToString());
                 shipment.Cost = cost.Value.Fee;
-                shipment.TransactionType = TransactionType.Internal;
+                shipment.Status = Status.OrderReceived; //Masih eksplisit, bisa masukin di profile mapper
                 shipment.TransactionId = transactionId.Id;
+                shipment.TransactionType = TransactionType.Internal;
+                shipment.BranchId = 0;
+
                 var shipmentResult = await _shipment.Insert(shipment);
 
                 return Ok(new ShipmentInternalOutput
