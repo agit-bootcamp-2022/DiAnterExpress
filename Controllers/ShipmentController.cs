@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using DiAnterExpress.Data;
 using DiAnterExpress.Dtos;
+using DiAnterExpress.Models;
 using Microsoft.AspNetCore.Mvc;
 using NetTopologySuite.Geometries;
 
@@ -15,12 +17,17 @@ namespace DiAnterExpress.Controllers
     {
         private readonly IShipmentType _shipmentType;
         private readonly IShipment _shipment;
+        private readonly ITransactionInternal _transactionInternal;
+        private readonly IMapper _mapper;
 
-        public ShipmentController(IShipmentType shipmentType, 
-            IShipment shipment)
+        public ShipmentController(IShipmentType shipmentType,
+            IShipment shipment, ITransactionInternal transactionInternal,
+            IMapper mapper)
         {
             _shipmentType = shipmentType;
             _shipment = shipment;
+            _transactionInternal = transactionInternal;
+            _mapper = mapper;
         }
 
         [HttpPost]
@@ -53,11 +60,42 @@ namespace DiAnterExpress.Controllers
         {
             try
             {
-                
+                //HttpRequest Get UangTransId
+                // IF (valid){
+                var transactionInternal = new TransactionInternal
+                {
+                    Product = input.Product,
+                    PaymmentId = 0
+                };
+                var transactionId = await _transactionInternal.Insert(transactionInternal); //insert new transactionInternal
+                var shipment = _mapper.Map<Shipment>(input);
+                shipment.Status = Status.OrderReceived; //Masih eksplisit bisa masukin di profile mapper
+                shipment.BranchId = 0;
+                var mapCost = new ShipmentFeeInput  //map dulu biar getshipmentfee jalan
+                {
+                    SenderAddress = input.SenderAddress,
+                    ReceiverAddress = input.ReceiverAddress,
+                    Weight = input.TotalWeight,
+                    ShipmentTypeId = input.ShipmentTypeId
+                };
+                var cost = await GetShipmentFee(mapCost); //get fee function
+                shipment.Cost = cost.Value.Fee;
+                shipment.TransactionType = TransactionType.Internal;
+                shipment.TransactionId = transactionId.Id;
+                var shipmentResult = await _shipment.Insert(shipment);
+
+                //Http Post mutasi saldo??
+
+                return Ok(new ShipmentInternalOutput
+                {
+                    ShipmentId = shipmentResult.Id,
+                    StatusOrder = shipment.Status
+                });
+                // END IF (VALID)}
             }
             catch (System.Exception)
             {
-                
+
                 throw;
             }
         }

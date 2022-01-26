@@ -8,6 +8,6 @@ namespace DiAnterExpress.Dtos
     public class ShipmentInternalOutput
     {
         public int ShipmentId { get; set; }
-        public string StatusOrder { get; set; }
+        public Enum StatusOrder { get; set; }
     }
 }

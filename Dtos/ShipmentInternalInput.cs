@@ -16,5 +16,6 @@ namespace DiAnterExpress.Dtos
         public string ReceiverContact { get; set; }
         public Location ReceiverAddress { get; set; }
         public int UangTransUserId { get; set; }
+        public int ShipmentTypeId { get; set; }
     }
 }
