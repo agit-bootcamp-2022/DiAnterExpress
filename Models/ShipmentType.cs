@@ -16,5 +16,7 @@ namespace DiAnterExpress.Models
         public double CostPerKg { get; set; }
         [Required]
         public double CostPerKm { get; set; }
+
+        public ICollection<Shipment> Shipment { get; set; }
     }
 }
