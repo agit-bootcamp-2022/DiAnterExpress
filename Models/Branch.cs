@@ -17,6 +17,8 @@ namespace DiAnterExpress.Models
         [Required]
         public string City {get; set;}
         [Required]
-        public int Phone {get; set;}
+        public string Phone {get; set;}
+        [Required]
+        public string UserId {get; set;}
     }
 }

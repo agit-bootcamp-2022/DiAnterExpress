@@ -73,6 +73,7 @@ namespace DiAnterExpress.Data
                 result.Address = obj.Address;
                 result.City = obj.City;
                 result.Phone = obj.Phone;
+                _db.Branches.Update(result);
                 await _db.SaveChangesAsync();
                 obj.Id = id;
                 return obj;
