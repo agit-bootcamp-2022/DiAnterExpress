@@ -5,29 +5,31 @@ using System.Threading.Tasks;
 using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
 using NetTopologySuite.Geometries;
+using Microsoft.EntityFrameworkCore;
 
 namespace DiAnterExpress.Data
 {
     public class DALShipment : IShipment
     {
-        public DALShipment()
+        private ApplicationDbContext _db;
+        public DALShipment(ApplicationDbContext db)
         {
-
+            _db = db;
         }
 
-        public Task<Shipment> Delete(int id)
+        public async Task<IEnumerable<Shipment>> GetAll()
         {
-            throw new NotImplementedException();
+            var results = await _db.Shipments.ToListAsync();
+            return results;
         }
 
-        public Task<IEnumerable<Shipment>> GetAll()
+        public async Task<Shipment> GetById(int id)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<Shipment> GetById(int id)
-        {
-            throw new NotImplementedException();
+            var result = await _db.Shipments.Where(s => s.Id == Convert.ToInt32(id)).SingleOrDefaultAsync<Shipment>();
+            if (result != null)
+                return result;
+            else
+                throw new Exception("Data tidak ditemukan !");
         }
 
         public Task<double> GetShipmentFee(ShipmentFeeInput input, double costPerKm, double costPerKg)
@@ -38,13 +40,18 @@ namespace DiAnterExpress.Data
             var fee = (distance * costPerKm) + (input.Weight * costPerKg);
             return Task.FromResult(fee);
         }
-
-        public Task<Shipment> Insert(Shipment obj)
+        
+        Task<Shipment> ICrud<Shipment>.Delete(int id)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Shipment> Update(int id, Shipment obj)
+        Task<Shipment> ICrud<Shipment>.Insert(Shipment obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Shipment> ICrud<Shipment>.Update(int id, Shipment obj)
         {
             throw new NotImplementedException();
         }
