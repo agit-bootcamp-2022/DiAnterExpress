@@ -7,6 +7,10 @@ namespace DiAnterExpress.Models
 {
     public class TransactionInternal
     {
-        
+        public int Id { get; set; }
+        public string Product { get; set; }
+        public int PaymmentId { get; set; }
+
+        public Shipment Shipment { get; set; }
     }
 }

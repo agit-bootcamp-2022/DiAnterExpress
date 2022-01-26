@@ -4,15 +4,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
+using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 
 namespace DiAnterExpress.Data
 {
     public class DALShipment : IShipment
     {
-        public DALShipment()
-        {
+        private ApplicationDbContext _db;
 
+        public DALShipment(ApplicationDbContext db)
+        {
+            _db = db;
         }
 
         public Task<Shipment> Delete(int id)
@@ -41,7 +44,16 @@ namespace DiAnterExpress.Data
 
         public Task<Shipment> Insert(Shipment obj)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _db.Shipments.Add(obj);
+                _db.SaveChangesAsync();
+                return Task.FromResult(obj);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Error: {dbEx.Message}");
+            }
         }
 
         public Task<Shipment> Update(int id, Shipment obj)

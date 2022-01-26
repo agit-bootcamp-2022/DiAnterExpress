@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DiAnterExpress.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace DiAnterExpress.Data
 {
     public class DALTransactionInternal : ITransactionInternal
     {
-        public DALTransactionInternal()
-        {
+        private ApplicationDbContext _db;
 
+        public DALTransactionInternal(ApplicationDbContext db)
+        {
+            _db = db;
         }
 
         public Task<TransactionInternal> Delete(int id)
@@ -30,7 +33,16 @@ namespace DiAnterExpress.Data
 
         public Task<TransactionInternal> Insert(TransactionInternal obj)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _db.TransactionInternals.Add(obj);
+                _db.SaveChangesAsync();
+                return Task.FromResult(obj);
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Error: {dbEx.Message}");
+            }
         }
 
         public Task<TransactionInternal> Update(int id, TransactionInternal obj)
