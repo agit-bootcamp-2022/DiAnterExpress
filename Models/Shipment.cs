@@ -32,7 +32,6 @@ namespace DiAnterExpress.Models
         public int ShipmentTypeId { get; set; }
         public int BranchId { get; set; }
 
-        public TransactionInternal TransactionInternal { get; set; }
         public ShipmentType ShipmentType { get; set; }
         public Branch Branch { get; set; }
     }

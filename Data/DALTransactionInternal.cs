@@ -31,13 +31,13 @@ namespace DiAnterExpress.Data
             throw new NotImplementedException();
         }
 
-        public Task<TransactionInternal> Insert(TransactionInternal obj)
+        public async Task<TransactionInternal> Insert(TransactionInternal obj)
         {
             try
             {
                 _db.TransactionInternals.Add(obj);
-                _db.SaveChangesAsync();
-                return Task.FromResult(obj);
+                await _db.SaveChangesAsync();
+                return obj;
             }
             catch (DbUpdateException dbEx)
             {

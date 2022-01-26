@@ -30,7 +30,7 @@ namespace DiAnterExpress.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost]
+        [HttpPost("GetShipmentFee")]
         public async Task<ActionResult<ShipmentFeeOutput>> GetShipmentFee(ShipmentFeeInput input)
         {
             try
@@ -55,50 +55,63 @@ namespace DiAnterExpress.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("CreateShipmentInternal")]
         public async Task<ActionResult<ShipmentInternalOutput>> CreateShipmentInternal(ShipmentInternalInput input)
         {
             try
             {
-                var mapCost = new ShipmentFeeInput  //map dulu biar getshipmentfee jalan
+                var shipmentType = await _shipmentType.GetById(input.ShipmentTypeId);
+                if (shipmentType != null)
                 {
-                    SenderAddress = input.SenderAddress,
-                    ReceiverAddress = input.ReceiverAddress,
-                    Weight = input.TotalWeight,
-                    ShipmentTypeId = input.ShipmentTypeId
-                };
-                var cost = await GetShipmentFee(mapCost); //get fee function
-                //var return = Http Post ke UangTrans, kirim UangTransId Bersangkutan dan costnya
-                // IF (return == positif)
-                // {
-                var transactionInternal = new TransactionInternal
+                    var mapCost = new ShipmentFeeInput
+                    {
+                        SenderAddress = input.SenderLocation,
+                        ReceiverAddress = input.ReceiverLocation,
+                        Weight = input.TotalWeight,
+                        ShipmentTypeId = input.ShipmentTypeId
+                    };
+                    var fee = await _shipment.GetShipmentFee(mapCost, shipmentType.CostPerKm, shipmentType.CostPerKg);
+                    
+                    //HTTP POST UangTransId & fee TO UANGTRANS
+                    //IF (RETURN FROM UANG TRANS == POSITIF) THEN DO FOLLOWING
+
+                    var transactionInternal = new TransactionInternal
+                    {
+                        Product = input.Product,
+                        PaymmentId = 0 //nantinya bakal pakai paymentId yang direturn UangTrans
+                    };
+                    var transactionId = await _transactionInternal.Insert(transactionInternal);
+
+                    var shipment = new Shipment
+                    {
+                        SenderName = input.SenderName,
+                        SenderContact = input.SenderContact,
+                        SenderAddress = new Point(input.SenderLocation.Latitude, input.SenderLocation.Longitude) { SRID = 4326 },
+                        ReceiverName = input.ReceiverName,
+                        ReceiverContact = input.ReceiverContact,
+                        ReceiverAddress = new Point(input.ReceiverLocation.Latitude, input.ReceiverLocation.Longitude) { SRID = 4326 },
+                        TotalWeight = input.TotalWeight,
+                        Cost = fee,
+                        Status = Status.OrderReceived,
+                        TransactionType = TransactionType.Internal,
+                        TransactionId = transactionId.Id,
+                        ShipmentTypeId = input.ShipmentTypeId,
+                        BranchId = 1
+                    };
+                    var shipmentResult = await _shipment.Insert(shipment);
+                    return Ok(new ShipmentInternalOutput
+                    {
+                        ShipmentId = shipmentResult.Id,
+                        StatusOrder = shipment.Status.ToString()
+                    });
+
+                    //ELSE -> return bad request
+
+                }
+                else
                 {
-                    Product = input.Product,
-                    PaymmentId = 0 //nantinya bakal pakai paymentId yang direturn UangTrans
-                };
-                var transactionId = await _transactionInternal.Insert(transactionInternal); //insert new transactionInternal
-
-                var shipment = _mapper.Map<Shipment>(input);
-                Console.WriteLine(shipment.ReceiverContact.ToString());
-                Console.WriteLine(shipment.ReceiverAddress.ToString());
-                shipment.Cost = cost.Value.Fee;
-                shipment.Status = Status.OrderReceived; //Masih eksplisit, bisa masukin di profile mapper
-                shipment.TransactionId = transactionId.Id;
-                shipment.TransactionType = TransactionType.Internal;
-                shipment.BranchId = 0;
-
-                var shipmentResult = await _shipment.Insert(shipment);
-
-                return Ok(new ShipmentInternalOutput
-                {
-                    ShipmentId = shipmentResult.Id,
-                    StatusOrder = shipment.Status
-                });
-                // END IF }
-                // else
-                // {
-                // return BadRequest();
-                // }
+                    return NotFound();
+                }
             }
             catch (Exception ex)
             {

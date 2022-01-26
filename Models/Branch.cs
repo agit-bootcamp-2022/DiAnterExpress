@@ -18,5 +18,7 @@ namespace DiAnterExpress.Models
         public string City {get; set;}
         [Required]
         public int Phone {get; set;}
+
+        public ICollection<Shipment> Shipment { get; set; }
     }
 }

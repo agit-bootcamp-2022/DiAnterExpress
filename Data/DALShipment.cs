@@ -42,13 +42,13 @@ namespace DiAnterExpress.Data
             return Task.FromResult(fee);
         }
 
-        public Task<Shipment> Insert(Shipment obj)
+        public async Task<Shipment> Insert(Shipment obj)
         {
             try
             {
                 _db.Shipments.Add(obj);
-                _db.SaveChangesAsync();
-                return Task.FromResult(obj);
+                await _db.SaveChangesAsync();
+                return obj;
             }
             catch (DbUpdateException dbEx)
             {
