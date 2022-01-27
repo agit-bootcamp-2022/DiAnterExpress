@@ -76,7 +76,7 @@ namespace DiAnterExpress.Controllers
                     var fee = await _shipment.GetShipmentFee(mapCost, shipmentType.CostPerKm, shipmentType.CostPerKg);
                     var inputHttp = new TransferBalanceDto
                     {
-                        customerDebitId = 1,
+                        customerDebitId = input.UangTransUserId,
                         debitAmount = fee,
                         customerCreditId = 1,
                         creditAmount = fee
