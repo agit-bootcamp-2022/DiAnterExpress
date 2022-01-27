@@ -35,7 +35,6 @@ namespace DiAnterExpress.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("Registration/Branch")]
         public async Task<ActionResult<string>> RegistrationBranch(DtoUserInputBranch input)
         {

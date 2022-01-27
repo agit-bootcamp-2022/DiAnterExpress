@@ -96,8 +96,10 @@ namespace DiAnterExpress.Controllers
                 {
                     var mapCost = new ShipmentFeeInput
                     {
-                        SenderAddress = input.SenderLocation,
-                        ReceiverAddress = input.ReceiverLocation,
+                        SenderLat = input.SenderLocation.Latitude,
+                        SenderLong = input.SenderLocation.Longitude,
+                        ReceiverLat = input.ReceiverLocation.Latitude,
+                        ReceiverLong = input.ReceiverLocation.Longitude,
                         Weight = input.TotalWeight,
                         ShipmentTypeId = input.ShipmentTypeId
                     };

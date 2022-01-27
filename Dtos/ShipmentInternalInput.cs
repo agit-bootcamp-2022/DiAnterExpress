@@ -18,4 +18,9 @@ namespace DiAnterExpress.Dtos
         public int UangTransUserId { get; set; }
         public int ShipmentTypeId { get; set; }
     }
+
+    public class Location{
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+    }
 }

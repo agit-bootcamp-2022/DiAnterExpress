@@ -39,10 +39,10 @@ namespace DiAnterExpress.Data
 
         public Task<double> GetShipmentFee(ShipmentFeeInput input, double costPerKm, double costPerKg)
         {
-            var senderLocation = new Point(input.SenderAddress.Latitude, input.SenderAddress.Longitude) { SRID = 4326 };
-            var receiverLocation = new Point(input.ReceiverAddress.Latitude, input.ReceiverAddress.Longitude) { SRID = 4326 };
-            var distance = senderLocation.Distance(receiverLocation) / 1000;
-            var fee = (distance * costPerKm) + (input.Weight * costPerKg);
+            var senderLocation = new Point(input.SenderLat, input.SenderLong) { SRID = 4326 };
+            var receiverLocation = new Point(input.ReceiverLat, input.ReceiverLong) { SRID = 4326 };
+            var distance = Math.Ceiling(senderLocation.Distance(receiverLocation) / 1000);
+            var fee = Math.Ceiling((((distance * costPerKm) + (input.Weight * costPerKg)) / 500)) * 500 ;
             return Task.FromResult(fee);
         }
 
