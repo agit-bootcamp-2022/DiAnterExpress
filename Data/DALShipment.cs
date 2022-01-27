@@ -42,7 +42,7 @@ namespace DiAnterExpress.Data
             var senderLocation = new Point(input.LatSenderAddress, input.LongSenderAddress) { SRID = 4326 };
             var receiverLocation = new Point(input.LatReceiverAddress, input.LongReceiverAddress) { SRID = 4326 };
             var distance = Math.Ceiling(senderLocation.Distance(receiverLocation) / 1000);
-            var fee = Math.Ceiling((((distance * costPerKm) + (input.Weight * costPerKg))/500) * 500 );
+            var fee = Math.Ceiling((((distance * costPerKm) + (input.Weight * costPerKg)) / 500)) * 500 ;
             return Task.FromResult(fee);
         }
 
