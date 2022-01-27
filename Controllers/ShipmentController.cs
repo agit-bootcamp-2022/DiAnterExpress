@@ -57,6 +57,34 @@ namespace DiAnterExpress.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        [HttpPost("fee/all")]
+        public async Task<ActionResult<IEnumerable<DtoShipmentFeeAllType>>> GetShipmentFeeAllType(ShipmentFeeAllInput input)
+        {
+            try
+            {
+                var newInput = _mapper.Map<ShipmentFeeInput>(input);
+                var shipmentTypes = await _shipmentType.GetAll();
+                var response = new List<DtoShipmentFeeAllType>();
+                if (shipmentTypes != null)
+                {
+                    foreach (var shipmentType in shipmentTypes)
+                    {
+                        var fee = await _shipment.GetShipmentFee(newInput, shipmentType.CostPerKm, shipmentType.CostPerKg);
+                        response.Add(new DtoShipmentFeeAllType
+                        {
+                            Id = shipmentType.Id,
+                            Name = shipmentType.Name,
+                            TotalFee = fee
+                        });
+                    }
+                }
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
         [HttpPost("internal")]
         public async Task<ActionResult<ShipmentInternalOutput>> CreateShipmentInternal(ShipmentInternalInput input)
