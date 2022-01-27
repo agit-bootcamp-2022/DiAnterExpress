@@ -1,6 +1,6 @@
 ﻿namespace DiAnterExpress.Dtos
 {
-    public class ShipmentFeeAllInput
+    public class ShipmentFeeAllTypeInsertDto
     {
         public double SenderLat { get; set; }
         public double SenderLong { get; set; }

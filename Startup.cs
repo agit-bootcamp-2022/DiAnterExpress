@@ -7,7 +7,6 @@ using AuthService.Data;
 using DiAnterExpress.Data;
 using DiAnterExpress.Externals;
 using DiAnterExpress.Models;
-using DiAnterExpress.SyncDataServices.Http;
 using GraphQL.Client.Abstractions;
 using GraphQL.Client.Http;
 using GraphQL.Client.Serializer.Newtonsoft;
@@ -81,8 +80,8 @@ namespace DiAnterExpress
             services.AddScoped<ITransactionInternal, DALTransactionInternal>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            services.AddScoped<IShipmentInternalDataClient, HttpShipmentInternalDataClient>();
             services.AddScoped<ITokopodiaDataClient, TokopodiaDataClient>();
+            services.AddScoped<IUangTransDataClient, UangTransDataClient>();
 
             //AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

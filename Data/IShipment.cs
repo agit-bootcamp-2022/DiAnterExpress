@@ -9,6 +9,6 @@ namespace DiAnterExpress.Data
 {
     public interface IShipment : ICrud<Shipment>
     {
-        public Task<double> GetShipmentFee(ShipmentFeeInput input, double costPerKm, double costPerKg);
+        public Task<double> GetShipmentFee(ShipmentFeeInsertDto input, double costPerKm, double costPerKg);
     }
 }

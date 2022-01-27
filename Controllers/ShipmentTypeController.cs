@@ -80,7 +80,7 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ReturnSuccessDto<DtoShipmentType>>> Post([FromBody] CreateShipmentType obj)
+        public async Task<ActionResult<ReturnSuccessDto<ShipmentType>>> Post([FromBody] ShipmentTypeInsertDto obj)
         {
             try
             {
@@ -107,7 +107,7 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ReturnSuccessDto<DtoShipmentType>>> Put(int id, [FromBody] CreateShipmentType obj)
+        public async Task<ActionResult<ReturnSuccessDto<DtoShipmentType>>> Put(int id, [FromBody] ShipmentTypeInsertDto obj)
         {
             try
             {

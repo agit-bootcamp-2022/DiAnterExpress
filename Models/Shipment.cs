@@ -11,11 +11,15 @@ namespace DiAnterExpress.Models
     {
         [Key]
         public int Id { get; set; }
+        [Required]
         public string SenderName { get; set; }
+        [Required]
         public string SenderContact { get; set; }
         [Required]
         public Point SenderAddress { get; set; }
+        [Required]
         public string ReceiverName { get; set; }
+        [Required]
         public string ReceiverContact { get; set; }
         [Required]
         public Point ReceiverAddress { get; set; }

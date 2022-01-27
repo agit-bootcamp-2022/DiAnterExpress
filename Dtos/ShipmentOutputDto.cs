@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DiAnterExpress.Dtos
 {
-    public class DtoShipmentOutput
+    public class ShipmentOutputDto
     {
         public int Id { get; set; }
         public string SenderName { get; set; }

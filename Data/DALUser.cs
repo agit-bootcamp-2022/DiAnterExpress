@@ -118,7 +118,7 @@ namespace AuthService.Data
             return roles;
         }
 
-        public async Task<ApplicationUser> Insert(DtoUserRegister input)
+        public async Task<ApplicationUser> Insert(UserInsertDto input)
         {
             try
             {

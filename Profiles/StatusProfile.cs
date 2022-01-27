@@ -12,10 +12,9 @@ namespace DiAnterExpress.Profiles
     {
         public StatusProfile()
         {
-            CreateMap<Shipment, DtoStatus>()
+            CreateMap<Shipment, StatusOutputDto>()
             .ForMember(dst => dst.Status,
                 opt => opt.MapFrom(src => (Status)src.Status));
         }
-        
     }
 }

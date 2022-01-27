@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DiAnterExpress.Dtos
 {
-    public class ShipmentInternalInput
+    public class ShipmentInternalInsertDto
     {
         public string Product { get; set; }
         public double TotalWeight { get; set; }

@@ -37,7 +37,7 @@ namespace DiAnterExpress.Data
                 throw new Exception("Data tidak ditemukan !");
         }
 
-        public Task<double> GetShipmentFee(ShipmentFeeInput input, double costPerKm, double costPerKg)
+        public Task<double> GetShipmentFee(ShipmentFeeInsertDto input, double costPerKm, double costPerKg)
         {
             var senderLocation = new Point(input.SenderLong, input.SenderLat) { SRID = 4326 };
             var receiverLocation = new Point(input.ReceiverLong, input.ReceiverLat) { SRID = 4326 };

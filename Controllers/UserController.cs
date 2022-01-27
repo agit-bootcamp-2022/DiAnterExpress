@@ -42,11 +42,11 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpPost("Registration/Branch")]
-        public async Task<ActionResult<ReturnSuccessDto<string>>> RegistrationBranch(DtoUserInputBranch input)
+        public async Task<ActionResult<ReturnSuccessDto<string>>> RegistrationBranch(UserBranchInsertDto input)
         {
             try
             {
-                var result = await _user.Insert(_mapper.Map<DtoUserRegister>(input));
+                var result = await _user.Insert(_mapper.Map<UserInsertDto>(input));
                 var branch = new Branch
                 {
                     Name = input.Name,
@@ -77,7 +77,7 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpPost("Authentication")]
-        public async Task<ActionResult<ReturnSuccessDto<string>>> Authentication([FromBody] DtoUserCredentials credentials)
+        public async Task<ActionResult<ReturnSuccessDto<ApplicationUser>>> Authentication([FromBody] UserCredentialsDto credentials)
         {
             try
             {

@@ -11,9 +11,8 @@ namespace DiAnterExpress.Profiles
     {
         public ProfileUser()
         {
-            CreateMap<DtoUserInputBranch, DtoUserRegister>()
+            CreateMap<UserBranchInsertDto, UserInsertDto>()
                 .ForMember(dst => dst.Role, opt => opt.MapFrom(src => role.branch));
-    
         }
     }
 }

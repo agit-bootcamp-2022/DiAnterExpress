@@ -6,7 +6,7 @@ using NetTopologySuite.Geometries;
 
 namespace DiAnterExpress.Dtos
 {
-    public class ShipmentFeeInput
+    public class ShipmentFeeInsertDto
     {
         public double SenderLat { get; set; }
         public double SenderLong { get; set; }

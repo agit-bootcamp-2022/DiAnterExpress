@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DiAnterExpress.Dtos
 {
-    public class DtoUserInputBranch
+    public class UserBranchInsertDto
     {
         public string Name { get; set; }
         public string Address { get; set; }
@@ -17,7 +17,7 @@ namespace DiAnterExpress.Dtos
         public string Password { get; set; }
     }
 
-    public class DtoUserRegister
+    public class UserInsertDto
     {
         public string Name { get; set; }
         public string Address { get; set; }
@@ -28,20 +28,10 @@ namespace DiAnterExpress.Dtos
         public string Password { get; set; }
     }
 
-    public class DtoUserOutput
-    {
-
-    }
-
-    public class DtoUserCredentials
+    public class UserCredentialsDto
     {
         public string Username { get; set; }
         public string Password { get; set; }
-    }
-
-    public class DtoUserIdInput
-    {
-        public string UserId { get; set; }
     }
 
     public enum role
