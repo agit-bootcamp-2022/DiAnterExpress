@@ -29,9 +29,15 @@ namespace DiAnterExpress.Controllers
         private readonly IBranch _branch;
         private readonly ITokopodiaDataClient _tokopodia;
 
-        public ShipmentController(IShipmentType shipmentType,
-            IShipment shipment, IMapper mapper, IUangTransDataClient uangTrans,
-            ITransactionInternal transactionInternal, IBranch branch, ITokopodiaDataClient tokopodia)
+        public ShipmentController(
+            IShipmentType shipmentType,
+            IShipment shipment,
+            IMapper mapper,
+            IUangTransDataClient uangTrans,
+            ITransactionInternal transactionInternal,
+            IBranch branch,
+            ITokopodiaDataClient tokopodia
+        )
         {
             _shipmentType = shipmentType;
             _shipment = shipment;
@@ -49,28 +55,16 @@ namespace DiAnterExpress.Controllers
             try
             {
                 var shipmentType = await _shipmentType.GetById(input.ShipmentTypeId);
-                if (shipmentType != null)
-                {
-                    var fee = await _shipment.GetShipmentFee(input, shipmentType.CostPerKm, shipmentType.CostPerKg);
-                    return Ok(
-                        new ReturnSuccessDto<ShipmentFeeOutputDto>
+                var fee = await _shipment.GetShipmentFee(input, shipmentType.CostPerKm, shipmentType.CostPerKg);
+                return Ok(
+                    new ReturnSuccessDto<ShipmentFeeOutputDto>
+                    {
+                        data = new ShipmentFeeOutputDto
                         {
-                            data = new ShipmentFeeOutputDto
-                            {
-                                Fee = fee
-                            }
+                            Fee = fee
                         }
-                    );
-                }
-                else
-                {
-                    return NotFound(
-                        new ReturnErrorDto
-                        {
-                            message = "Shipment Type not found"
-                        }
-                    );
-                }
+                    }
+                );
             }
             catch (System.Exception ex)
             {
@@ -90,21 +84,23 @@ namespace DiAnterExpress.Controllers
         {
             try
             {
-                var newInput = _mapper.Map<ShipmentFeeInsertDto>(input);
                 var shipmentTypes = await _shipmentType.GetAll();
+                if (!shipmentTypes.Any()) return NotFound("ShipmentType kosong");
+
+                var newInput = _mapper.Map<ShipmentFeeInsertDto>(input);
                 var response = new List<ShipmentFeeAllTypeOutputDto>();
-                if (shipmentTypes != null)
+
+                foreach (var shipmentType in shipmentTypes)
                 {
-                    foreach (var shipmentType in shipmentTypes)
-                    {
-                        var fee = await _shipment.GetShipmentFee(newInput, shipmentType.CostPerKm, shipmentType.CostPerKg);
-                        response.Add(new ShipmentFeeAllTypeOutputDto
+                    var fee = await _shipment.GetShipmentFee(newInput, shipmentType.CostPerKm, shipmentType.CostPerKg);
+                    response.Add(
+                        new ShipmentFeeAllTypeOutputDto
                         {
                             Id = shipmentType.Id,
                             Name = shipmentType.Name,
                             TotalFee = fee
-                        });
-                    }
+                        }
+                    );
                 }
                 return Ok(
                     new ReturnSuccessDto<IEnumerable<ShipmentFeeAllTypeOutputDto>>
@@ -132,16 +128,32 @@ namespace DiAnterExpress.Controllers
             try
             {
                 var shipmentType = await _shipmentType.GetById(input.ShipmentTypeId);
-                if (shipmentType != null)
+
+                var mapCost = new ShipmentFeeInsertDto
                 {
-                    var mapCost = new ShipmentFeeInsertDto
+                    SenderLat = input.SenderLocation.Latitude,
+                    SenderLong = input.SenderLocation.Longitude,
+                    ReceiverLat = input.ReceiverLocation.Latitude,
+                    ReceiverLong = input.ReceiverLocation.Longitude,
+                    Weight = input.TotalWeight,
+                    ShipmentTypeId = input.ShipmentTypeId
+                };
+
+                var fee = await _shipment.GetShipmentFee(mapCost, shipmentType.CostPerKm, shipmentType.CostPerKg);
+                var inputHttp = new TransferBalanceDto
+                {
+                    customerDebitId = input.UangTransUserId,
+                    Amount = fee,
+                    customerCreditId = 1 //TODO Replace customerCreditId with AnterAjaUangTransId(?)
+                };
+
+                var httpRequest = await _http.CreateShipmentInternal(inputHttp);
+                if (httpRequest.Succeed)
+                {
+                    var transactionInternal = new TransactionInternal
                     {
-                        SenderLat = input.SenderLocation.Latitude,
-                        SenderLong = input.SenderLocation.Longitude,
-                        ReceiverLat = input.ReceiverLocation.Latitude,
-                        ReceiverLong = input.ReceiverLocation.Longitude,
-                        Weight = input.TotalWeight,
-                        ShipmentTypeId = input.ShipmentTypeId
+                        Product = input.Product,
+                        PaymmentId = 0 //TODO Replace paymentId from UangTrans
                     };
                     var fee = await _shipment.GetShipmentFee(mapCost, shipmentType.CostPerKm, shipmentType.CostPerKg);
 
@@ -250,32 +262,54 @@ namespace DiAnterExpress.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ReturnSuccessDto<ShipmentOutputDto>>> GetShipmentById(int id)
         {
-            var result = await _shipment.GetById(id);
-            if (result == null)
-                return NotFound();
+            try
+            {
+                var result = await _shipment.GetById(id);
 
-            return Ok(
-                new ReturnSuccessDto<ShipmentOutputDto>
-                {
-                    data = _mapper.Map<ShipmentOutputDto>(result)
-                }
-            );
+                return Ok(
+                    new ReturnSuccessDto<ShipmentOutputDto>
+                    {
+                        data = _mapper.Map<ShipmentOutputDto>(result)
+                    }
+                );
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
+            }
         }
 
         [AllowAnonymous]
         [HttpGet("{id}/Status")]
         public async Task<ActionResult<ReturnSuccessDto<StatusOutputDto>>> GetShipmentStatus(int id)
         {
-            var result = await _shipment.GetById(id);
-            if (result == null)
-                return NotFound();
+            try
+            {
+                var result = await _shipment.GetById(id);
 
-            return Ok(
-                new ReturnSuccessDto<StatusOutputDto>
-                {
-                    data = _mapper.Map<StatusOutputDto>(result)
-                }
-            );
+                return Ok(
+                    new ReturnSuccessDto<StatusOutputDto>
+                    {
+                        data = _mapper.Map<StatusOutputDto>(result)
+                    }
+                );
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
+            }
         }
 
         [Authorize(Roles = "Admin, Tokopodia")]

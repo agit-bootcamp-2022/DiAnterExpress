@@ -67,7 +67,7 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ReturnSuccessDto<string>>> Put(int id, [FromBody] BranchInsertDto input)
+        public async Task<ActionResult<ReturnSuccessDto<string>>> UpdateBranch(int id, [FromBody] BranchInsertDto input)
         {
             try
             {
