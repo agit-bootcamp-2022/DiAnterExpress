@@ -185,7 +185,7 @@ namespace DiAnterExpress.Controllers
                 var shipmentObj = new Shipment
                 {
                     TransactionId = input.transactionId,
-                    TransactionType = transactionType.Tokopodia,
+                    TransactionType = TransactionType.Tokopodia,
 
                     SenderName = input.senderName,
                     SenderContact = input.senderContact,
@@ -197,7 +197,7 @@ namespace DiAnterExpress.Controllers
 
                     TotalWeight = input.totalWeight,
                     Cost = totalFee,
-                    Status = status.OrderReceived,
+                    Status = Status.OrderReceived,
                     ShipmentTypeId = input.shipmentTypeId,
                     BranchId = 0, // TODO Get Nearest Branch
                 };
