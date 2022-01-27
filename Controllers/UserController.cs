@@ -9,6 +9,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using NetTopologySuite.Geometries;
 
 namespace DiAnterExpress.Controllers
 {
@@ -42,12 +43,14 @@ namespace DiAnterExpress.Controllers
             try
             {
                 var result = await _user.Insert(_mapper.Map<DtoUserRegister>(input));
-                var branch = new Branch{
-                            Name = input.Name,
-                            Address = input.Address,
-                            City = input.City,
-                            Phone = input.Phone,
-                            UserId = result.Id
+                var branch = new Branch
+                {
+                    Name = input.Name,
+                    Address = input.Address,
+                    City = input.City,
+                    Phone = input.Phone,
+                    Location = new Point(input.Latitude, input.Longitude) { SRID = 4326 },
+                    UserId = result.Id
                 };
                 await _branch.Insert(branch);
                 return Ok("Berhasil register");
