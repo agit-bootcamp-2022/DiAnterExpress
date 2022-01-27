@@ -22,7 +22,7 @@ namespace DiAnterExpress.Controllers
         private readonly IShipmentInternalDataClient _http;
         private readonly ITransactionInternal _transactionInternal;
 
-        public ShipmentController(IShipmentType shipmentType, 
+        public ShipmentController(IShipmentType shipmentType,
             IShipment shipment, IMapper mapper, IShipmentInternalDataClient http,
             ITransactionInternal transactionInternal)
         {
@@ -74,41 +74,50 @@ namespace DiAnterExpress.Controllers
                         ShipmentTypeId = input.ShipmentTypeId
                     };
                     var fee = await _shipment.GetShipmentFee(mapCost, shipmentType.CostPerKm, shipmentType.CostPerKg);
-
-                    //HTTP POST UangTransId & fee TO UANGTRANS
-                    //IF (RETURN FROM UANG TRANS == POSITIF) THEN DO FOLLOWING
-
-                    var transactionInternal = new TransactionInternal
+                    var inputHttp = new TransferBalanceDto
                     {
-                        Product = input.Product,
-                        PaymmentId = 0 //nantinya bakal pakai paymentId yang direturn UangTrans
+                        customerDebitId = 1,
+                        debitAmount = fee,
+                        customerCreditId = 1,
+                        creditAmount = fee
                     };
-                    var transactionId = await _transactionInternal.Insert(transactionInternal);
-
-                    var shipment = new Shipment
+                    var httpRequest = await _http.CreateShipmentInternal(inputHttp);
+                    if (httpRequest.debitAmount == fee && httpRequest.creditAmount == fee)
                     {
-                        SenderName = input.SenderName,
-                        SenderContact = input.SenderContact,
-                        SenderAddress = new Point(input.SenderLocation.Latitude, input.SenderLocation.Longitude) { SRID = 4326 },
-                        ReceiverName = input.ReceiverName,
-                        ReceiverContact = input.ReceiverContact,
-                        ReceiverAddress = new Point(input.ReceiverLocation.Latitude, input.ReceiverLocation.Longitude) { SRID = 4326 },
-                        TotalWeight = input.TotalWeight,
-                        Cost = fee,
-                        Status = Status.OrderReceived,
-                        TransactionType = TransactionType.Internal,
-                        TransactionId = transactionId.Id,
-                        ShipmentTypeId = input.ShipmentTypeId,
-                        BranchId = 1
-                    };
-                    var shipmentResult = await _shipment.Insert(shipment);
-                    return Ok(new ShipmentInternalOutput
-                    {
-                        ShipmentId = shipmentResult.Id,
-                        StatusOrder = shipment.Status.ToString()
-                    });
+                        var transactionInternal = new TransactionInternal
+                        {
+                            Product = input.Product,
+                            PaymmentId = 0 //nantinya bakal pakai paymentId yang direturn UangTrans
+                        };
+                        var transactionId = await _transactionInternal.Insert(transactionInternal);
 
-                    //ELSE -> return bad request
+                        var shipment = new Shipment
+                        {
+                            SenderName = input.SenderName,
+                            SenderContact = input.SenderContact,
+                            SenderAddress = new Point(input.SenderLocation.Latitude, input.SenderLocation.Longitude) { SRID = 4326 },
+                            ReceiverName = input.ReceiverName,
+                            ReceiverContact = input.ReceiverContact,
+                            ReceiverAddress = new Point(input.ReceiverLocation.Latitude, input.ReceiverLocation.Longitude) { SRID = 4326 },
+                            TotalWeight = input.TotalWeight,
+                            Cost = fee,
+                            Status = Status.OrderReceived,
+                            TransactionType = TransactionType.Internal,
+                            TransactionId = transactionId.Id,
+                            ShipmentTypeId = input.ShipmentTypeId,
+                            BranchId = 1
+                        };
+                        var shipmentResult = await _shipment.Insert(shipment);
+                        return Ok(new ShipmentInternalOutput
+                        {
+                            ShipmentId = shipmentResult.Id,
+                            StatusOrder = shipment.Status.ToString()
+                        });
+                    }
+                    else
+                    {
+                        return BadRequest();
+                    }
 
                 }
                 else
@@ -121,7 +130,7 @@ namespace DiAnterExpress.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DtoShipmentOutput>>> GetAllShipment()
         {
