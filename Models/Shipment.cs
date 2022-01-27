@@ -11,15 +11,11 @@ namespace DiAnterExpress.Models
     {
         [Key]
         public int Id { get; set; }
-        [Required]
         public string SenderName { get; set; }
-        [Required]
         public string SenderContact { get; set; }
         [Required]
         public Point SenderAddress { get; set; }
-        [Required]
         public string ReceiverName { get; set; }
-        [Required]
         public string ReceiverContact { get; set; }
         [Required]
         public Point ReceiverAddress { get; set; }
@@ -28,26 +24,29 @@ namespace DiAnterExpress.Models
         [Required]
         public double Cost { get; set; }
         [Required]
-        public status Status { get; set; }
+        public Status Status { get; set; }
         [Required]
-        public transactionType TransactionType { get; set; }
+        public TransactionType TransactionType { get; set; }
         [Required]
         public int TransactionId { get; set; }
-        [Required]
         public int ShipmentTypeId { get; set; }
-        [Required]
         public int BranchId { get; set; }
-    }
-    public enum status
-    {
-        OrderReceived,
-        InTransit,
-        Delivered,
+
+        public ShipmentType ShipmentType { get; set; }
+        public Branch Branch { get; set; }
     }
 
-    public enum transactionType
+    public enum Status
+    {
+        OrderReceived,
+        SendingToDestBranch,
+        ArrivedAtDestBranch,
+        Delivered
+    }
+
+    public enum TransactionType
     {
         Internal,
-        Tokopedia,
+        Tokopodia
     }
 }

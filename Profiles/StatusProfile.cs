@@ -14,7 +14,7 @@ namespace DiAnterExpress.Profiles
         {
             CreateMap<Shipment, DtoStatus>()
             .ForMember(dst => dst.Status,
-                opt => opt.MapFrom(src => (status)src.Status));
+                opt => opt.MapFrom(src => (Status)src.Status));
         }
         
     }

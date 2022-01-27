@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
-using NetTopologySuite.Geometries;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
 
 namespace DiAnterExpress.Data
 {
@@ -15,6 +15,11 @@ namespace DiAnterExpress.Data
         public DALShipment(ApplicationDbContext db)
         {
             _db = db;
+        }
+
+        public Task<Shipment> Delete(int id)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<Shipment>> GetAll()
@@ -40,18 +45,22 @@ namespace DiAnterExpress.Data
             var fee = (distance * costPerKm) + (input.Weight * costPerKg);
             return Task.FromResult(fee);
         }
-        
-        Task<Shipment> ICrud<Shipment>.Delete(int id)
+
+        public async Task<Shipment> Insert(Shipment obj)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _db.Shipments.Add(obj);
+                await _db.SaveChangesAsync();
+                return obj;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                throw new Exception($"Error: {dbEx.Message}");
+            }
         }
 
-        Task<Shipment> ICrud<Shipment>.Insert(Shipment obj)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Shipment> ICrud<Shipment>.Update(int id, Shipment obj)
+        public Task<Shipment> Update(int id, Shipment obj)
         {
             throw new NotImplementedException();
         }

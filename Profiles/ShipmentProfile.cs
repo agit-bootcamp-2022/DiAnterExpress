@@ -19,7 +19,7 @@ namespace DiAnterExpress.Profiles
             .ForMember(dst => dst.ReceiverAddress,
                 opt => opt.MapFrom(src => new location { Lat = src.ReceiverAddress.X, Long = src.ReceiverAddress.Y }))
             .ForMember(dst => dst.Status,
-                opt => opt.MapFrom(src => (status)src.Status));
+                opt => opt.MapFrom(src => (Status)src.Status));
         }
     }
 }
