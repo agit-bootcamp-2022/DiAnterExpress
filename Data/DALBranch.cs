@@ -17,19 +17,18 @@ namespace DiAnterExpress.Data
             _db = db;
         }
 
-        public Task<Branch> Delete(int id)
+        public async Task<Branch> Delete(int id)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task DeleteById(int id)
-        {
-            var result = await GetById(id);
-            if (result == null) throw new Exception("Data tidak ditemukan!");
             try
             {
+                var result = await GetById(id);
+
+                if (result == null) throw new Exception("Data tidak ditemukan!");
+
                 _db.Branches.Remove(result);
                 await _db.SaveChangesAsync();
+
+                return result;
             }
             catch (DbUpdateException dbEx)
             {
@@ -39,17 +38,19 @@ namespace DiAnterExpress.Data
 
         public async Task<IEnumerable<Branch>> GetAll()
         {
-            var results = await _db.Branches.OrderBy(b => b.Name).ToListAsync();
+            var results = await _db.Branches.ToListAsync();
             return results;
         }
 
         public async Task<Branch> GetById(int id)
         {
-            var result = await _db.Branches.Where(s => s.Id == id).SingleOrDefaultAsync<Branch>();
-            if (result != null)
-                return result;
-            else
-                throw new Exception("Data tidak ditemukan !");
+            var result = await _db.Branches.Where(
+                branch => branch.Id == id
+            ).SingleOrDefaultAsync<Branch>();
+
+            if (result == null) throw new Exception("Branch tidak ditemukan!");
+
+            return result;
         }
 
         public async Task<Branch> GetNearestByLocation(Dtos.Location location)
@@ -102,14 +103,16 @@ namespace DiAnterExpress.Data
             try
             {
                 var result = await GetById(id);
+
                 result.Name = obj.Name;
                 result.Address = obj.Address;
                 result.City = obj.City;
                 result.Phone = obj.Phone;
+
                 _db.Branches.Update(result);
                 await _db.SaveChangesAsync();
-                obj.Id = id;
-                return obj;
+
+                return result;
             }
             catch (DbUpdateException dbEx)
             {

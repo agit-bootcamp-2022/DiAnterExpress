@@ -9,7 +9,6 @@ namespace DiAnterExpress.Data
 {
     public interface IBranch : ICrud<Branch>
     {
-        Task DeleteById(int id);
         Task<Branch> GetNearestByLocation(Location location);
         Task<Branch> GetByUserId(string id);
     }

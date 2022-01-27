@@ -118,7 +118,7 @@ namespace DiAnterExpress.Controllers
         {
             try
             {
-                await _branch.DeleteById(id);
+                await _branch.Delete(id);
                 return Ok(
                     new ReturnSuccessDto<string>
                     {
