@@ -104,7 +104,8 @@ namespace DiAnterExpress.Controllers
                             TransactionType = TransactionType.Internal,
                             TransactionId = transactionId.Id,
                             ShipmentTypeId = input.ShipmentTypeId,
-                            BranchId = 1 //TODO Implement BranchId auto search func (?)
+                            BranchSrcId = 1, //TODO Implement BranchId auto search func (?)
+                            BranchDstId = 1,
                         };
                         var shipmentResult = await _shipment.Insert(shipment);
                         return Ok(new ShipmentInternalOutput
@@ -199,7 +200,8 @@ namespace DiAnterExpress.Controllers
                     Cost = totalFee,
                     Status = Status.OrderReceived,
                     ShipmentTypeId = input.shipmentTypeId,
-                    BranchId = 0, // TODO Get Nearest Branch
+                    BranchSrcId = 1, // TODO Get Nearest Branch
+                    BranchDstId = 1, // TODO Get Nearest Branch
                 };
 
                 var result = await _shipment.Insert(shipmentObj);
