@@ -30,9 +30,8 @@ namespace DiAnterExpress.SyncDataServices.Http
                         mutation TransferBalance{
                             transferBalance(input: $input{
                                 customerDebitId,
-                                debitAmount,
-                                customerCreditId,
-                                creditAmount,
+                                amount,
+                                customerCreditId
                             }) {
                                 succeed, message
                             }
