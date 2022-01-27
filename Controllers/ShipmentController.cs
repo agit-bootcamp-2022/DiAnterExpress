@@ -33,7 +33,7 @@ namespace DiAnterExpress.Controllers
             _transactionInternal = transactionInternal;
         }
 
-        [HttpPost("GetShipmentFee")]
+        [HttpPost("fee")]
         public async Task<ActionResult<ShipmentFeeOutput>> GetShipmentFee(ShipmentFeeInput input)
         {
             try
