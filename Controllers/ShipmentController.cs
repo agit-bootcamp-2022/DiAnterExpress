@@ -21,16 +21,18 @@ namespace DiAnterExpress.Controllers
         private readonly IMapper _mapper;
         private readonly IShipmentInternalDataClient _http;
         private readonly ITransactionInternal _transactionInternal;
+        private readonly IBranch _branch;
 
         public ShipmentController(IShipmentType shipmentType,
             IShipment shipment, IMapper mapper, IShipmentInternalDataClient http,
-            ITransactionInternal transactionInternal)
+            ITransactionInternal transactionInternal, IBranch branch)
         {
             _shipmentType = shipmentType;
             _shipment = shipment;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _http = http;
             _transactionInternal = transactionInternal;
+            _branch = branch;
         }
 
         [HttpPost("fee")]
@@ -95,17 +97,21 @@ namespace DiAnterExpress.Controllers
                             SenderName = input.SenderName,
                             SenderContact = input.SenderContact,
                             SenderAddress = new Point(input.SenderLocation.Latitude, input.SenderLocation.Longitude) { SRID = 4326 },
+
                             ReceiverName = input.ReceiverName,
                             ReceiverContact = input.ReceiverContact,
                             ReceiverAddress = new Point(input.ReceiverLocation.Latitude, input.ReceiverLocation.Longitude) { SRID = 4326 },
+
                             TotalWeight = input.TotalWeight,
                             Cost = fee,
                             Status = Status.OrderReceived,
+
                             TransactionType = TransactionType.Internal,
                             TransactionId = transactionId.Id,
                             ShipmentTypeId = input.ShipmentTypeId,
-                            BranchSrcId = 1, //TODO Implement BranchId auto search func (?)
-                            BranchDstId = 1,
+
+                            BranchSrcId = (await _branch.GetNearestByLocation(input.SenderLocation)).Id,
+                            BranchDstId = (await _branch.GetNearestByLocation(input.ReceiverLocation)).Id,
                         };
                         var shipmentResult = await _shipment.Insert(shipment);
                         return Ok(new ShipmentInternalOutput
@@ -182,7 +188,6 @@ namespace DiAnterExpress.Controllers
                     shipmentType.CostPerKm, shipmentType.CostPerKg
                 );
 
-                // TODO Use automapper instead of manually creating Shipment Object
                 var shipmentObj = new Shipment
                 {
                     TransactionId = input.transactionId,
@@ -200,8 +205,19 @@ namespace DiAnterExpress.Controllers
                     Cost = totalFee,
                     Status = Status.OrderReceived,
                     ShipmentTypeId = input.shipmentTypeId,
-                    BranchSrcId = 1, // TODO Get Nearest Branch
-                    BranchDstId = 1, // TODO Get Nearest Branch
+
+                    BranchSrcId = (await _branch.GetNearestByLocation(
+                        new Dtos.Location
+                        {
+                            Latitude = input.senderLat,
+                            Longitude = input.senderLong
+                        })).Id,
+                    BranchDstId = (await _branch.GetNearestByLocation(
+                        new Dtos.Location
+                        {
+                            Latitude = input.receiverLat,
+                            Longitude = input.receiverLong
+                        })).Id,
                 };
 
                 var result = await _shipment.Insert(shipmentObj);
