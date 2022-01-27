@@ -6,6 +6,7 @@ using AutoMapper;
 using DiAnterExpress.Data;
 using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
+using DiAnterExpress.SyncDataServices.Http;
 using Microsoft.AspNetCore.Mvc;
 using NetTopologySuite.Geometries;
 
@@ -18,14 +19,17 @@ namespace DiAnterExpress.Controllers
         private readonly IShipmentType _shipmentType;
         private readonly IShipment _shipment;
         private readonly IMapper _mapper;
+        private readonly IShipmentInternalDataClient _http;
         private readonly ITransactionInternal _transactionInternal;
 
-        public ShipmentController(IShipmentType shipmentType,
-            IShipment shipment, IMapper mapper, ITransactionInternal transactionInternal)
+        public ShipmentController(IShipmentType shipmentType, 
+            IShipment shipment, IMapper mapper, IShipmentInternalDataClient http,
+            ITransactionInternal transactionInternal)
         {
             _shipmentType = shipmentType;
             _shipment = shipment;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _http = http; //buat call method di httprequest (?)
             _transactionInternal = transactionInternal;
         }
 
