@@ -42,7 +42,7 @@ namespace DiAnterExpress.Data
             var senderLocation = new Point(input.SenderLat, input.SenderLong) { SRID = 4326 };
             var receiverLocation = new Point(input.ReceiverLat, input.ReceiverLong) { SRID = 4326 };
             var distance = Math.Ceiling(senderLocation.Distance(receiverLocation) / 1000);
-            var fee = Math.Ceiling((((distance * costPerKm) + (input.Weight * costPerKg)) / 500)) * 500 ;
+            var fee = Math.Ceiling((((distance * costPerKm) + (input.Weight * costPerKg)) / 500)) * 500;
             return Task.FromResult(fee);
         }
 
@@ -60,9 +60,21 @@ namespace DiAnterExpress.Data
             }
         }
 
-        public Task<Shipment> Update(int id, Shipment obj)
+        public async Task<Shipment> Update(int id, Shipment obj)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var oldShipment = await GetById(id);
+
+                oldShipment.Status = obj.Status;
+
+                await _db.SaveChangesAsync();
+                return oldShipment;
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
         }
     }
 }
