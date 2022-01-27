@@ -58,7 +58,7 @@ namespace DiAnterExpress.Controllers
             }
         }
 
-        [HttpPost("CreateShipmentInternal")]
+        [HttpPost("internal")]
         public async Task<ActionResult<ShipmentInternalOutput>> CreateShipmentInternal(ShipmentInternalInput input)
         {
             try
