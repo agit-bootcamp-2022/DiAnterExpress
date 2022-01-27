@@ -33,37 +33,25 @@ namespace DiAnterExpress.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<BranchDto>> GetBranchById(int id)
         {
-            var result = await _branch.GetById(id);
-            if (result == null)
-                return NotFound();
-
-            return Ok(_mapper.Map<BranchDto>(result));
-        }
-
-        [HttpPost]
-        public async Task<ActionResult<BranchDto>> Post([FromBody] BranchCreateDto branchCreateDto)
-        {
-           try
+            try
             {
-                var result = await _branch.Insert(_mapper.Map<Branch>(branchCreateDto));
-
+                var result = await _branch.GetById(id);
                 return Ok(_mapper.Map<BranchDto>(result));
             }
-            catch (System.Exception ex)
-            {
+            catch (Exception ex)
+            {     
                 return BadRequest(ex.Message);
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<BranchDto>> Put(int id, [FromBody] BranchCreateDto branchCreateDto)
+        public async Task<ActionResult<string>> Put(int id, [FromBody] BranchCreateDto branchCreateDto)
         {
             try
             {
                 var branch = _mapper.Map<Branch>(branchCreateDto);
                 var result = await _branch.Update(id, branch);
-                var branchdto = _mapper.Map<Dtos.BranchDto>(result);
-                return Ok(branchdto);
+                return Ok("Data branch berhasil di update");
             }
             catch (Exception ex)
             {
