@@ -157,11 +157,30 @@ namespace DiAnterExpress.Controllers
             return Ok(_mapper.Map<DtoStatus>(result));
         }
 
-        [HttpPost]
+        [HttpPost("tokopodia")]
         public async Task<ActionResult<DtoShipmentCreateReturn>> CreateShipmentTokpod([FromBody] DtoShipmentCreateTokopodia input)
         {
             try
             {
+                var shipmentType = await _shipmentType.GetById(input.shipmentTypeId);
+
+                var totalFee = await _shipment.GetShipmentFee(
+                    new ShipmentFeeInput
+                    {
+                        SenderAddress = new Dtos.Location
+                        {
+                            Latitude = input.senderLat,
+                            Longitude = input.senderLong
+                        },
+                        ReceiverAddress = new Dtos.Location
+                        {
+                            Latitude = input.receiverLat,
+                            Longitude = input.receiverLong
+                        },
+                    },
+                    shipmentType.CostPerKm, shipmentType.CostPerKg
+                );
+
                 // TODO Use automapper instead of manually creating Shipment Object
                 var shipmentObj = new Shipment
                 {
@@ -177,9 +196,10 @@ namespace DiAnterExpress.Controllers
                     ReceiverAddress = new Point(input.receiverLat, input.receiverLong) { SRID = 4326 },
 
                     TotalWeight = input.totalWeight,
+                    Cost = totalFee,
                     Status = status.OrderReceived,
                     ShipmentTypeId = input.shipmentTypeId,
-                    BranchId = 0,
+                    BranchId = 0, // TODO Get Nearest Branch
                 };
 
                 var result = await _shipment.Insert(shipmentObj);
