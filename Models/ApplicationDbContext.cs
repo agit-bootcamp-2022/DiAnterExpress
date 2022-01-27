@@ -10,6 +10,6 @@ namespace DiAnterExpress.Models
         public DbSet<Shipment> Shipments { get; set; }
         //public DbSet<ShipmentTransaction> ShipmentTransactions { get; set; }
         public DbSet<ShipmentType> ShipmentTypes { get; set; }
-        //public DbSet<TransactionInternal> TransactionInternals { get; set; }
+        public DbSet<TransactionInternal> TransactionInternals { get; set; }
     }
 }
