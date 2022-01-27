@@ -20,9 +20,7 @@ namespace DiAnterExpress.Models
         [Required]
         public string Phone { get; set; }
         [Required]
-        public Point Latitude { get; set; }
-        [Required]
-        public Point Longitude { get; set; }
+        public Point Location { get; set; }
         [Required]
         public string UserId { get; set; }
     }
