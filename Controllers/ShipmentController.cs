@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -8,6 +9,7 @@ using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
 using DiAnterExpress.SyncDataServices.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using NetTopologySuite.Geometries;
 
 namespace DiAnterExpress.Controllers
