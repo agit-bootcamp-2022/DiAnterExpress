@@ -10,10 +10,12 @@ namespace DiAnterExpress.Dtos
         public int transactionId { get; set; }
         public string senderName { get; set; }
         public string senderContact { get; set; }
-        public Location senderAddress { get; set; }
+        public double senderLat { get; set; }
+        public double senderLong { get; set; }
         public string receiverName { get; set; }
         public string receiverContact { get; set; }
-        public Location receiverAddress { get; set; }
+        public double receiverLat { get; set; }
+        public double receiverLong { get; set; }
         public double totalWeight { get; set; }
         public int shipmentTypeId { get; set; }
     }
@@ -22,11 +24,5 @@ namespace DiAnterExpress.Dtos
     {
         public int shipmentId { get; set; }
         public string statusOrder { get; set; }
-    }
-
-    public class Location
-    {
-        public double lat { get; set; }
-        public double lon { get; set; }
     }
 }

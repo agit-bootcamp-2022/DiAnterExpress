@@ -165,21 +165,21 @@ namespace DiAnterExpress.Controllers
                 // TODO Use automapper instead of manually creating Shipment Object
                 var shipmentObj = new Shipment
                 {
-                    transactionId = input.transactionId,
-                    transactionType = TransactionType.Tokopodia,
+                    TransactionId = input.transactionId,
+                    TransactionType = transactionType.Tokopodia,
 
-                    senderName = input.senderName,
-                    senderContact = input.senderContact,
-                    senderAddress = new Point(input.senderAddress.lat, input.senderAddress.lon) { SRID = 4326 },
+                    SenderName = input.senderName,
+                    SenderContact = input.senderContact,
+                    SenderAddress = new Point(input.senderLat, input.senderLong) { SRID = 4326 },
 
-                    receiverName = input.receiverName,
-                    receiverContact = input.receiverContact,
-                    receiverAddress = new Point(input.receiverAddress.lat, input.receiverAddress.lon) { SRID = 4326 },
+                    ReceiverName = input.receiverName,
+                    ReceiverContact = input.receiverContact,
+                    ReceiverAddress = new Point(input.receiverLat, input.receiverLong) { SRID = 4326 },
 
-                    totalWeight = input.totalWeight,
-                    status = Status.OrderReceived,
-                    shipmentTypeId = input.shipmentTypeId,
-                    branchId = 0,
+                    TotalWeight = input.totalWeight,
+                    Status = status.OrderReceived,
+                    ShipmentTypeId = input.shipmentTypeId,
+                    BranchId = 0,
                 };
 
                 var result = await _shipment.Insert(shipmentObj);
@@ -188,7 +188,7 @@ namespace DiAnterExpress.Controllers
                     new DtoShipmentCreateReturn
                     {
                         shipmentId = result.Id,
-                        statusOrder = result.status.ToString()
+                        statusOrder = result.Status.ToString()
                     }
                 );
             }
