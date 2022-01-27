@@ -29,7 +29,7 @@ namespace DiAnterExpress.Controllers
             _shipmentType = shipmentType;
             _shipment = shipment;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _http = http; //buat call method di httprequest (?)
+            _http = http; 
             _transactionInternal = transactionInternal;
         }
 
@@ -78,7 +78,7 @@ namespace DiAnterExpress.Controllers
                     {
                         customerDebitId = input.UangTransUserId,
                         Amount = fee,
-                        customerCreditId = 1
+                        customerCreditId = 1 //TODO Replace customerCreditId with AnterAjaUangTransId(?)
                     };
                     var httpRequest = await _http.CreateShipmentInternal(inputHttp);
                     if (httpRequest.Succeed == true)
@@ -86,7 +86,7 @@ namespace DiAnterExpress.Controllers
                         var transactionInternal = new TransactionInternal
                         {
                             Product = input.Product,
-                            PaymmentId = 0 //nantinya bakal pakai paymentId yang direturn UangTrans
+                            PaymmentId = 0 //TODO Replace paymentId from UangTrans
                         };
                         var transactionId = await _transactionInternal.Insert(transactionInternal);
 
@@ -104,7 +104,7 @@ namespace DiAnterExpress.Controllers
                             TransactionType = TransactionType.Internal,
                             TransactionId = transactionId.Id,
                             ShipmentTypeId = input.ShipmentTypeId,
-                            BranchId = 1
+                            BranchId = 1 //TODO Implement BranchId auto search func (?)
                         };
                         var shipmentResult = await _shipment.Insert(shipment);
                         return Ok(new ShipmentInternalOutput
