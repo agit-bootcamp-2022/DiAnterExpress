@@ -4,6 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using DiAnterExpress.Data;
 using DiAnterExpress.Models;
+using DiAnterExpress.SyncDataServices.Http;
+using GraphQL.Client.Abstractions;
+using GraphQL.Client.Http;
+using GraphQL.Client.Serializer.Newtonsoft;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -39,6 +43,9 @@ namespace DiAnterExpress
             services.AddScoped<IShipmentType, DALShipmentType>();
             services.AddScoped<ITransactionInternal, DALTransactionInternal>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddScoped<IGraphQLClient>(s => new GraphQLHttpClient(Configuration["GraphQLURI"], new NewtonsoftJsonSerializer()));
+            services.AddScoped<IShipmentInternalDataClient,HttpShipmentInternalDataClient>();
 
             //AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
