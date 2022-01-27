@@ -72,6 +72,17 @@ namespace DiAnterExpress.Data
             }
         }
 
+        public async Task<Branch> GetByUserId(string id)
+        {
+            var result = await _db.Branches.Where(
+                branch => branch.UserId == id
+            ).FirstOrDefaultAsync();
+
+            if (result == null) throw new Exception("UserId not found");
+
+            return result;
+        }
+
         public async Task<Branch> Insert(Branch obj)
         {
             try
