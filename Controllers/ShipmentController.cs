@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DiAnterExpress.Data;
 using DiAnterExpress.Dtos;
+using DiAnterExpress.Externals;
 using DiAnterExpress.Models;
 using DiAnterExpress.SyncDataServices.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,10 +25,11 @@ namespace DiAnterExpress.Controllers
         private readonly IShipmentInternalDataClient _http;
         private readonly ITransactionInternal _transactionInternal;
         private readonly IBranch _branch;
+        private readonly ITokopodiaDataClient _tokopodia;
 
         public ShipmentController(IShipmentType shipmentType,
             IShipment shipment, IMapper mapper, IShipmentInternalDataClient http,
-            ITransactionInternal transactionInternal, IBranch branch)
+            ITransactionInternal transactionInternal, IBranch branch, ITokopodiaDataClient tokopodia)
         {
             _shipmentType = shipmentType;
             _shipment = shipment;
@@ -35,6 +37,7 @@ namespace DiAnterExpress.Controllers
             _http = http;
             _transactionInternal = transactionInternal;
             _branch = branch;
+            _tokopodia = tokopodia;
         }
 
         [HttpPost("fee")]
@@ -265,7 +268,74 @@ namespace DiAnterExpress.Controllers
             }
             catch (System.Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(ex.ToString());
+            }
+        }
+
+        [HttpPatch("{id}/Status/{status}")]
+        public async Task<ActionResult<DtoStatus>> UpdateShipmentStatus(int id, Status status)
+        {
+            try
+            {
+                var decodedToken = new JwtSecurityTokenHandler().ReadJwtToken(
+                    Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "")
+                );
+
+                var userId = decodedToken.Claims.Where(
+                    claim => claim.Type == "UserId"
+                ).First();
+
+                var branch = await _branch.GetByUserId(userId.Value);
+                var shipment = await _shipment.GetById(id);
+
+                if (status == Status.SendingToDestBranch && shipment.BranchSrcId != branch.Id)
+                    return Forbid("You are not authorized to update this shipment status");
+
+                if (status == Status.ArrivedAtDestBranch && shipment.BranchDstId != branch.Id)
+                    return Forbid("You are not authorized to update this shipment status");
+
+                if (status == Status.Delivered && shipment.BranchDstId != branch.Id)
+                    return Forbid("You are not authorized to update this shipment status");
+
+                var result = await _shipment.Update(
+                    shipment.Id,
+                    new Shipment
+                    {
+                        Status = status,
+                    }
+                );
+
+                if (status == Status.Delivered)
+                {
+                    try
+                    {
+                        await _tokopodia.ShipmentDelivered(shipment.TransactionId, shipment.TransactionToken);
+                    }
+                    catch (System.Exception)
+                    {
+                        result = await _shipment.Update(
+                            shipment.Id,
+                            new Shipment
+                            {
+                                Status = Status.ArrivedAtDestBranch,
+                            }
+                        );
+
+                        throw;
+                    }
+                }
+
+                return Ok(
+                    new DtoStatus
+                    {
+                        Id = shipment.Id,
+                        Status = result.Status.ToString(),
+                    }
+                );
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(ex.ToString());
             }
         }
     }
