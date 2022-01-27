@@ -22,7 +22,7 @@ namespace DiAnterExpress.SyncDataServices.Http
         {
             _client = client;
         }
-        public async Task<TransferBalanceDto> CreateShipmentInternal(TransferBalanceDto transferBalanceDto)
+        public async Task<TransactionStatus> CreateShipmentInternal(TransferBalanceDto transferBalanceDto)
         {
             var query = new GraphQLRequest
             {
@@ -40,7 +40,7 @@ namespace DiAnterExpress.SyncDataServices.Http
                 Variables = new{input = transferBalanceDto},
             };
             var response = await _client.SendMutationAsync<GetTransferBalanceDto>(query);
-            return response.Data.transferBalance;
+            return response.Data.transactionStatus;
         }
     }
 }

@@ -77,12 +77,11 @@ namespace DiAnterExpress.Controllers
                     var inputHttp = new TransferBalanceDto
                     {
                         customerDebitId = input.UangTransUserId,
-                        debitAmount = fee,
-                        customerCreditId = 1,
-                        creditAmount = fee
+                        Amount = fee,
+                        customerCreditId = 1
                     };
                     var httpRequest = await _http.CreateShipmentInternal(inputHttp);
-                    if (httpRequest.debitAmount == fee && httpRequest.creditAmount == fee)
+                    if (httpRequest.Succeed == true)
                     {
                         var transactionInternal = new TransactionInternal
                         {
