@@ -24,7 +24,7 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ShipmentType>>> Get()
+        public async Task<ActionResult<IEnumerable<DtoShipmentType>>> Get()
         {
             try
             {
@@ -40,11 +40,12 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ShipmentType>> GetByIdUser(int id)
+        public async Task<ActionResult<DtoShipmentType>> GetById(int id)
         {
             try
             {
-                var response = await _shipmentType.GetById(id);
+                var data = await _shipmentType.GetById(id);
+                var response = _mapper.Map<DtoShipmentType>(data);
                 return Ok(response);
             }
             catch (Exception ex)
