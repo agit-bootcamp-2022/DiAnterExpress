@@ -11,6 +11,7 @@ using DiAnterExpress.Models;
 using GraphQL;
 using GraphQL.Client.Abstractions;
 using GraphQL.Client.Http;
+using GraphQL.Client.Serializer.Newtonsoft;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
@@ -19,9 +20,20 @@ namespace DiAnterExpress.SyncDataServices.Http
     public class HttpShipmentInternalDataClient : IShipmentInternalDataClient
     {
         private readonly GraphQLHttpClient _client;
-        public HttpShipmentInternalDataClient(GraphQLHttpClient client)
+        private readonly IConfiguration _configuration;
+        private readonly GraphQLHttpClientOptions graphqlOptions;
+
+        public HttpShipmentInternalDataClient(IConfiguration configuration)
         {
-            _client = client;
+            _configuration = configuration;
+            graphqlOptions = new GraphQLHttpClientOptions
+            {
+                EndPoint = new Uri(_configuration["UangTransURI"], UriKind.Absolute)
+            };
+            _client = new GraphQLHttpClient(
+                graphqlOptions,
+                new NewtonsoftJsonSerializer()
+            );
         }
         public async Task<TransactionStatus> CreateShipmentInternal(TransferBalanceDto transferBalanceDto, string token)
         {
