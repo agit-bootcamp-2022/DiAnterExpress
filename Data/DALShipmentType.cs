@@ -31,13 +31,13 @@ namespace DiAnterExpress.Data
 
         public async Task<IEnumerable<ShipmentType>> GetAll()
         {
-             var shipmentTypes = await _db.ShipmentTypes.OrderBy(x => x.Name).ToListAsync();
-             return shipmentTypes;
+            var shipmentTypes = await _db.ShipmentTypes.OrderBy(x => x.Name).ToListAsync();
+            return shipmentTypes;
         }
 
         public async Task<ShipmentType> GetById(int id)
         {
-            var  shipmentType = await _db.ShipmentTypes.Where(x => x.Id == id).FirstOrDefaultAsync();
+            var shipmentType = await _db.ShipmentTypes.Where(x => x.Id == id).FirstOrDefaultAsync();
             if (shipmentType == null)
             {
                 throw new Exception("Id not found");
@@ -67,7 +67,8 @@ namespace DiAnterExpress.Data
                 shipmentType.CostPerKg = obj.CostPerKg;
                 shipmentType.CostPerKm = obj.CostPerKm;
 
-            } else
+            }
+            else
             {
                 throw new Exception($"Data with no id {id} is not found");
             }

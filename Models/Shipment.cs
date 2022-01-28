@@ -29,8 +29,10 @@ namespace DiAnterExpress.Models
         public TransactionType TransactionType { get; set; }
         [Required]
         public int TransactionId { get; set; }
+        public string TransactionToken { get; set; }
         public int ShipmentTypeId { get; set; }
-        public int BranchId { get; set; }
+        public int BranchSrcId { get; set; }
+        public int BranchDstId { get; set; }
 
         public ShipmentType ShipmentType { get; set; }
         public Branch Branch { get; set; }

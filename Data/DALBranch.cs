@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.Geometries;
 
 namespace DiAnterExpress.Data
 {
@@ -20,7 +22,7 @@ namespace DiAnterExpress.Data
             throw new NotImplementedException();
         }
 
-        public async Task DeleteById (int id)
+        public async Task DeleteById(int id)
         {
             var result = await GetById(id);
             if (result == null) throw new Exception("Data tidak ditemukan!");
@@ -48,6 +50,26 @@ namespace DiAnterExpress.Data
                 return result;
             else
                 throw new Exception("Data tidak ditemukan !");
+        }
+
+        public async Task<Branch> GetNearestByLocation(Dtos.Location location)
+        {
+            try
+            {
+                var locationPoint = new Point(location.Latitude, location.Longitude) { SRID = 4326 };
+
+                var nearestBranch = await _db.Branches.OrderBy(
+                    b => b.Location.Distance(locationPoint)
+                ).FirstOrDefaultAsync();
+
+                if (nearestBranch == null) throw new Exception("Branch not found");
+
+                return nearestBranch;
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
         }
 
         public async Task<Branch> Insert(Branch obj)

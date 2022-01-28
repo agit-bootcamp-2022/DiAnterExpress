@@ -21,16 +21,18 @@ namespace DiAnterExpress.Controllers
         private readonly IMapper _mapper;
         private readonly IShipmentInternalDataClient _http;
         private readonly ITransactionInternal _transactionInternal;
+        private readonly IBranch _branch;
 
         public ShipmentController(IShipmentType shipmentType,
             IShipment shipment, IMapper mapper, IShipmentInternalDataClient http,
-            ITransactionInternal transactionInternal)
+            ITransactionInternal transactionInternal, IBranch branch)
         {
             _shipmentType = shipmentType;
             _shipment = shipment;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _http = http; 
+            _http = http;
             _transactionInternal = transactionInternal;
+            _branch = branch;
         }
 
         [HttpPost("fee")]
@@ -125,16 +127,21 @@ namespace DiAnterExpress.Controllers
                             SenderName = input.SenderName,
                             SenderContact = input.SenderContact,
                             SenderAddress = new Point(input.SenderLocation.Latitude, input.SenderLocation.Longitude) { SRID = 4326 },
+
                             ReceiverName = input.ReceiverName,
                             ReceiverContact = input.ReceiverContact,
                             ReceiverAddress = new Point(input.ReceiverLocation.Latitude, input.ReceiverLocation.Longitude) { SRID = 4326 },
+
                             TotalWeight = input.TotalWeight,
                             Cost = fee,
                             Status = Status.OrderReceived,
+
                             TransactionType = TransactionType.Internal,
                             TransactionId = transactionId.Id,
                             ShipmentTypeId = input.ShipmentTypeId,
-                            BranchId = 1 //TODO Implement BranchId auto search func (?)
+
+                            BranchSrcId = (await _branch.GetNearestByLocation(input.SenderLocation)).Id,
+                            BranchDstId = (await _branch.GetNearestByLocation(input.ReceiverLocation)).Id,
                         };
                         var shipmentResult = await _shipment.Insert(shipment);
                         return Ok(new ShipmentInternalOutput
@@ -185,6 +192,78 @@ namespace DiAnterExpress.Controllers
                 return NotFound();
 
             return Ok(_mapper.Map<DtoStatus>(result));
+        }
+
+        [HttpPost("tokopodia")]
+        public async Task<ActionResult<DtoShipmentCreateReturn>> CreateShipmentTokpod([FromBody] DtoShipmentCreateTokopodia input)
+        {
+            try
+            {
+                var shipmentType = await _shipmentType.GetById(input.shipmentTypeId);
+
+                var totalFee = await _shipment.GetShipmentFee(
+                    new ShipmentFeeInput
+                    {
+                        SenderAddress = new Dtos.Location
+                        {
+                            Latitude = input.senderLat,
+                            Longitude = input.senderLong
+                        },
+                        ReceiverAddress = new Dtos.Location
+                        {
+                            Latitude = input.receiverLat,
+                            Longitude = input.receiverLong
+                        },
+                    },
+                    shipmentType.CostPerKm, shipmentType.CostPerKg
+                );
+
+                var shipmentObj = new Shipment
+                {
+                    TransactionId = input.transactionId,
+                    TransactionType = TransactionType.Tokopodia,
+
+                    SenderName = input.senderName,
+                    SenderContact = input.senderContact,
+                    SenderAddress = new Point(input.senderLat, input.senderLong) { SRID = 4326 },
+
+                    ReceiverName = input.receiverName,
+                    ReceiverContact = input.receiverContact,
+                    ReceiverAddress = new Point(input.receiverLat, input.receiverLong) { SRID = 4326 },
+
+                    TotalWeight = input.totalWeight,
+                    Cost = totalFee,
+                    Status = Status.OrderReceived,
+                    ShipmentTypeId = input.shipmentTypeId,
+
+                    BranchSrcId = (await _branch.GetNearestByLocation(
+                        new Dtos.Location
+                        {
+                            Latitude = input.senderLat,
+                            Longitude = input.senderLong
+                        })).Id,
+                    BranchDstId = (await _branch.GetNearestByLocation(
+                        new Dtos.Location
+                        {
+                            Latitude = input.receiverLat,
+                            Longitude = input.receiverLong
+                        })).Id,
+                };
+
+                var result = await _shipment.Insert(shipmentObj);
+
+                return Ok(
+                    new DtoShipmentCreateReturn
+                    {
+                        shipmentId = result.Id,
+                        statusOrder = result.Status.ToString()
+                    }
+                );
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
