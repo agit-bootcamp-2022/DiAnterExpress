@@ -106,19 +106,29 @@ namespace DiAnterExpress.Controllers
                         ShipmentTypeId = input.ShipmentTypeId
                     };
                     var fee = await _shipment.GetShipmentFee(mapCost, shipmentType.CostPerKm, shipmentType.CostPerKg);
+
+                    var loginUser = new LoginUserInput
+                    {
+                        Username = input.UserCredential.UangTransUsername,
+                        Password = input.UserCredential.UangTransPassword
+                    };
+                    var token = await _http.LoginUser(loginUser);
+                    var customerId = await _http.GetProfile(token.Token);
+
                     var inputHttp = new TransferBalanceDto
                     {
-                        customerDebitId = input.UangTransUserId,
+                        CustomerDebitId = customerId.Id,
                         Amount = fee,
-                        customerCreditId = 1 //TODO Replace customerCreditId with AnterAjaUangTransId(?)
+                        CustomerCreditId = 5 //5 is AnterAja Id in UangTrans Service
                     };
-                    var httpRequest = await _http.CreateShipmentInternal(inputHttp);
+
+                    var httpRequest = await _http.CreateShipmentInternal(inputHttp, token.Token);
                     if (httpRequest.Succeed == true)
                     {
                         var transactionInternal = new TransactionInternal
                         {
                             Product = input.Product,
-                            PaymmentId = 0 //TODO Replace paymentId from UangTrans
+                            PaymentId = 0 //TODO Update PaymentId from UangTrans
                         };
                         var transactionId = await _transactionInternal.Insert(transactionInternal);
 
@@ -127,21 +137,28 @@ namespace DiAnterExpress.Controllers
                             SenderName = input.SenderName,
                             SenderContact = input.SenderContact,
                             SenderAddress = new Point(input.SenderLocation.Latitude, input.SenderLocation.Longitude) { SRID = 4326 },
-
                             ReceiverName = input.ReceiverName,
                             ReceiverContact = input.ReceiverContact,
                             ReceiverAddress = new Point(input.ReceiverLocation.Latitude, input.ReceiverLocation.Longitude) { SRID = 4326 },
-
                             TotalWeight = input.TotalWeight,
                             Cost = fee,
                             Status = Status.OrderReceived,
-
                             TransactionType = TransactionType.Internal,
                             TransactionId = transactionId.Id,
+                            TransactionToken = token.Token,
                             ShipmentTypeId = input.ShipmentTypeId,
-
-                            BranchSrcId = (await _branch.GetNearestByLocation(input.SenderLocation)).Id,
-                            BranchDstId = (await _branch.GetNearestByLocation(input.ReceiverLocation)).Id,
+                            BranchSrcId = (await _branch.GetNearestByLocation(
+                            new Dtos.Location
+                            {
+                                Latitude = input.SenderLocation.Latitude,
+                                Longitude = input.SenderLocation.Longitude
+                            })).Id,
+                                BranchDstId = (await _branch.GetNearestByLocation(
+                            new Dtos.Location
+                            {
+                                Latitude = input.ReceiverLocation.Latitude,
+                                Longitude = input.ReceiverLocation.Longitude
+                            })).Id,
                         };
                         var shipmentResult = await _shipment.Insert(shipment);
                         return Ok(new ShipmentInternalOutput
@@ -204,16 +221,10 @@ namespace DiAnterExpress.Controllers
                 var totalFee = await _shipment.GetShipmentFee(
                     new ShipmentFeeInput
                     {
-                        SenderAddress = new Dtos.Location
-                        {
-                            Latitude = input.senderLat,
-                            Longitude = input.senderLong
-                        },
-                        ReceiverAddress = new Dtos.Location
-                        {
-                            Latitude = input.receiverLat,
-                            Longitude = input.receiverLong
-                        },
+                        SenderLat = input.senderLat,
+                        SenderLong = input.senderLong,
+                        ReceiverLat = input.receiverLat,
+                        ReceiverLong = input.receiverLong
                     },
                     shipmentType.CostPerKm, shipmentType.CostPerKg
                 );

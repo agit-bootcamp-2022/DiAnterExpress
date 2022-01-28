@@ -15,11 +15,18 @@ namespace DiAnterExpress.Dtos
         public string ReceiverName { get; set; }
         public string ReceiverContact { get; set; }
         public Location ReceiverLocation { get; set; }
-        public int UangTransUserId { get; set; }
+        public UserCredential UserCredential { get; set; }
         public int ShipmentTypeId { get; set; }
     }
 
-    public class Location{
+    public class UserCredential
+    {
+        public string UangTransUsername { get; set; }
+        public string UangTransPassword { get; set; }
+    }
+
+    public class Location
+    {
         public double Latitude { get; set; }
         public double Longitude { get; set; }
     }
