@@ -26,12 +26,9 @@ namespace DiAnterExpress.SyncDataServices.Http
         public HttpShipmentInternalDataClient(IConfiguration configuration)
         {
             _configuration = configuration;
-            graphqlOptions = new GraphQLHttpClientOptions
-            {
-                EndPoint = new Uri(_configuration["UangTransURI"], UriKind.Absolute)
-            };
+
             _client = new GraphQLHttpClient(
-                graphqlOptions,
+                _configuration["UangTransURI"],
                 new NewtonsoftJsonSerializer()
             );
         }
