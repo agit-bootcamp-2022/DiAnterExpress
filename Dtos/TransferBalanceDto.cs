@@ -11,10 +11,26 @@ namespace DiAnterExpress.Dtos
         public double Amount { get; set; }
         public int CustomerCreditId { get; set; }
     }
+
+    public class TransferBalanceOutput
+    {
+        public bool Succeed { get; set; }
+        public int ReceiverWalletMutationId { get; set; }
+        public string Message { get; set; }
+    }
+
     public class TransactionStatus
     {
         public bool Succeed { get; set; }
         public string Message { get; set; }
+    }
+
+    public class ReturnData
+    {
+        public TransferBalanceOutput TransferBalance { get; set; }
+        public TransactionStatus TransactionStatus { get; set; }
+        public UserToken LoginUser { get; set; }
+        public List<ProfileOutput> ProfileByCustomerIdAsync { get; set; }
     }
 
     public class UserToken

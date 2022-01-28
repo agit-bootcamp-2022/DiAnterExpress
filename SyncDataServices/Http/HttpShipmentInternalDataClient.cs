@@ -21,7 +21,6 @@ namespace DiAnterExpress.SyncDataServices.Http
     {
         private readonly GraphQLHttpClient _client;
         private readonly IConfiguration _configuration;
-        private readonly GraphQLHttpClientOptions graphqlOptions;
 
         public HttpShipmentInternalDataClient(IConfiguration configuration)
         {
@@ -32,7 +31,7 @@ namespace DiAnterExpress.SyncDataServices.Http
                 new NewtonsoftJsonSerializer()
             );
         }
-        public async Task<TransactionStatus> CreateShipmentInternal(TransferBalanceDto transferBalanceDto, string token)
+        public async Task<TransferBalanceOutput> CreateShipmentInternal(TransferBalanceDto transferBalanceDto, string token)
         {
             try
             {
@@ -50,15 +49,14 @@ namespace DiAnterExpress.SyncDataServices.Http
                         ",
                     Variables = new { input = transferBalanceDto }
                 };
+
                 _client.HttpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
-                var response = await _client.SendMutationAsync<object>(query);
-                var stringResult = response.Data.ToString();
-                stringResult = stringResult.Replace($"\"transferBalance\":", string.Empty);
-                stringResult = stringResult.Remove(0, 1);
-                stringResult = stringResult.Remove(stringResult.Length - 1, 1);
-                var result = JsonConvert.DeserializeObject<TransactionStatus>(stringResult);
-                return result;
+
+                var result = await _client.SendMutationAsync<ReturnData>(query);
+                if (result.Data.TransferBalance == null) throw new Exception("Transfer Balance Failed");
+
+                return result.Data.TransferBalance;
             }
             catch (System.Exception ex)
             {
@@ -85,14 +83,11 @@ namespace DiAnterExpress.SyncDataServices.Http
                             ",
                     Variables = new { input = userInput }
                 };
-                var response = await _client.SendMutationAsync<object>(query);
-                var stringResult = response.Data.ToString();
-                stringResult = stringResult.Replace($"\"loginUser\":", string.Empty);
-                stringResult = stringResult.Remove(0, 1);
-                stringResult = stringResult.Remove(stringResult.Length - 1, 1);
 
-                var result = JsonConvert.DeserializeObject<UserToken>(stringResult);
-                return result;
+                var result = await _client.SendMutationAsync<ReturnData>(query);
+                if (result.Data.LoginUser == null) throw new Exception("Login to UangTrans failed");
+
+                return result.Data.LoginUser;
             }
             catch (System.Exception ex)
             {
@@ -119,17 +114,14 @@ namespace DiAnterExpress.SyncDataServices.Http
                                 }
                             }"
                 };
+
                 _client.HttpClient.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
-                var response = await _client.SendQueryAsync<object>(query);
-                var stringResult = response.Data.ToString();
-                stringResult = stringResult.Replace($"\"profileByCustomerIdAsync\": [", string.Empty);
-                stringResult = stringResult.Replace($"]", string.Empty);
-                stringResult = stringResult.Remove(0, 1);
-                stringResult = stringResult.Remove(stringResult.Length - 1, 1);
 
-                var result = JsonConvert.DeserializeObject<ProfileOutput>(stringResult);
-                return result;
+                var result = await _client.SendQueryAsync<ReturnData>(query);
+                if (result.Data.ProfileByCustomerIdAsync == null) throw new Exception("Failed to fetch UangTrans User Profile");
+
+                return result.Data.ProfileByCustomerIdAsync[0];
             }
             catch (System.Exception ex)
             {
@@ -140,10 +132,12 @@ namespace DiAnterExpress.SyncDataServices.Http
 
         public async Task<TransactionStatus> ShipmentDelivered(int id, string token)
         {
-            var query = new GraphQLRequest
+            try
             {
-                Query =
-                @"
+                var query = new GraphQLRequest
+                {
+                    Query =
+                    @"
                     mutation {
                         updateStatusTransaction( 
                             input:
@@ -156,14 +150,23 @@ namespace DiAnterExpress.SyncDataServices.Http
                         }
                     }
                 ",
-                Variables = new { transactionId = id },
-            };
+                    Variables = new { transactionId = id },
+                };
 
-            _client.HttpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
+                _client.HttpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await _client.SendMutationAsync<GetTransferBalanceDto>(query);
-            return response.Data.transactionStatus;
+                var response = await _client.SendMutationAsync<ReturnData>(query);
+                if (!response.Data.TransactionStatus.Succeed || response.Data.TransactionStatus == null)
+                    throw new Exception("Failed to update transaction status to UangTrans");
+
+                return response.Data.TransactionStatus;
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+
         }
     }
 }
