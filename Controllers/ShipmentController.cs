@@ -289,13 +289,13 @@ namespace DiAnterExpress.Controllers
                 var shipment = await _shipment.GetById(id);
 
                 if (status == Status.SendingToDestBranch && shipment.BranchSrcId != branch.Id)
-                    return Forbid("You are not authorized to update this shipment status");
+                    return Forbid("Bearer");
 
                 if (status == Status.ArrivedAtDestBranch && shipment.BranchDstId != branch.Id)
-                    return Forbid("You are not authorized to update this shipment status");
+                    return Forbid("Bearer");
 
                 if (status == Status.Delivered && shipment.BranchDstId != branch.Id)
-                    return Forbid("You are not authorized to update this shipment status");
+                    return Forbid("Bearer");
 
                 var result = await _shipment.Update(
                     shipment.Id,
