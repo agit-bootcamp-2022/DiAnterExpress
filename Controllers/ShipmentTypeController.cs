@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using DiAnterExpress.Data;
 using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
@@ -14,10 +15,12 @@ namespace DiAnterExpress.Controllers
     public class ShipmentTypeController : ControllerBase
     {
         private IShipmentType _shipmentType;
+        private IMapper _mapper;
 
-        public ShipmentTypeController(IShipmentType shipmentType)
+        public ShipmentTypeController(IShipmentType shipmentType, IMapper mapper)
         {
             _shipmentType = shipmentType;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -26,7 +29,7 @@ namespace DiAnterExpress.Controllers
             try
             {
                 var response = await _shipmentType.GetAll();
-                return Ok(response);
+                return Ok(_mapper.Map<IEnumerable<DtoShipmentType>>(response));
 
             }
             catch (Exception ex)
@@ -37,7 +40,7 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ShipmentType>> GetByIdCustomer(int id)
+        public async Task<ActionResult<ShipmentType>> GetByIdUser(int id)
         {
             try
             {
@@ -51,38 +54,29 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ShipmentType>> Post([FromBody] CreateShipmentType obj)
+        public async Task<ActionResult<DtoShipmentType>> Post([FromBody] CreateShipmentType obj)
         {
             try
             {
-                var map = new ShipmentType
-                {
-                    Name = obj.Name,
-                    CostPerKg = obj.CostPerKg,
-                    CostPerKm = obj.CostPerKm,
-                };
-                var response = await _shipmentType.Insert(map);
+                var map = _mapper.Map<ShipmentType>(obj);
+                var data = await _shipmentType.Insert(map);
+                var response = _mapper.Map<DtoShipmentType>(data);
                 return Ok(response);
             }
             catch (Exception ex)
             {
-
                 return BadRequest(ex.Message);
             }
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult> Put(int id, [FromBody] CreateShipmentType obj)
+        public async Task<ActionResult<DtoShipmentType>> Put(int id, [FromBody] CreateShipmentType obj)
         {
             try
             {
-                var map = new ShipmentType
-                {
-                    Name = obj.Name,
-                    CostPerKg = obj.CostPerKg,
-                    CostPerKm = obj.CostPerKm,
-                };
-                var response = await _shipmentType.Update(id, map);
+                var map = _mapper.Map<ShipmentType>(obj);
+                var data = await _shipmentType.Update(id, map);
+                var response = _mapper.Map<DtoShipmentType>(data);
                 return Ok(response);
             }
             catch (Exception ex)
