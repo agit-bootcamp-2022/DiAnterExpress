@@ -147,18 +147,8 @@ namespace DiAnterExpress.Controllers
                             TransactionId = transactionId.Id,
                             TransactionToken = token.Token,
                             ShipmentTypeId = input.ShipmentTypeId,
-                            BranchSrcId = (await _branch.GetNearestByLocation(
-                            new Dtos.Location
-                            {
-                                Latitude = input.SenderLocation.Latitude,
-                                Longitude = input.SenderLocation.Longitude
-                            })).Id,
-                                BranchDstId = (await _branch.GetNearestByLocation(
-                            new Dtos.Location
-                            {
-                                Latitude = input.ReceiverLocation.Latitude,
-                                Longitude = input.ReceiverLocation.Longitude
-                            })).Id,
+                            BranchSrcId = (await _branch.GetNearestByLocation(input.SenderLocation)).Id,
+                            BranchDstId = (await _branch.GetNearestByLocation(input.ReceiverLocation)).Id,
                         };
                         var shipmentResult = await _shipment.Insert(shipment);
                         return Ok(new ShipmentInternalOutput
