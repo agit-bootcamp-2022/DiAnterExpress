@@ -307,22 +307,8 @@ namespace DiAnterExpress.Controllers
 
                 if (status == Status.Delivered)
                 {
-                    try
-                    {
-                        await _tokopodia.ShipmentDelivered(shipment.TransactionId, shipment.TransactionToken);
-                    }
-                    catch (System.Exception)
-                    {
-                        result = await _shipment.Update(
-                            shipment.Id,
-                            new Shipment
-                            {
-                                Status = Status.ArrivedAtDestBranch,
-                            }
-                        );
-
-                        throw;
-                    }
+                    await _tokopodia.ShipmentDelivered(shipment.TransactionId, shipment.TransactionToken);
+                    await _http.ShipmentDelivered(shipment.TransactionId, shipment.TransactionToken);
                 }
 
                 return Ok(

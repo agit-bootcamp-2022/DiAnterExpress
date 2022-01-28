@@ -21,6 +21,7 @@ namespace DiAnterExpress.SyncDataServices.Http
     {
         private readonly GraphQLHttpClient _client;
         private readonly IConfiguration _configuration;
+        private readonly GraphQLHttpClientOptions graphqlOptions;
 
         public HttpShipmentInternalDataClient(IConfiguration configuration)
         {
@@ -135,6 +136,34 @@ namespace DiAnterExpress.SyncDataServices.Http
                 Console.WriteLine(ex.ToString());
                 throw;
             }
+        }
+
+        public async Task<TransactionStatus> ShipmentDelivered(int id, string token)
+        {
+            var query = new GraphQLRequest
+            {
+                Query =
+                @"
+                    mutation {
+                        updateStatusTransaction( 
+                            input:
+                            {
+                                transactionId: $transactionId
+                            }
+                        )
+                        {
+                            succeed, message
+                        }
+                    }
+                ",
+                Variables = new { transactionId = id },
+            };
+
+            _client.HttpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await _client.SendMutationAsync<GetTransferBalanceDto>(query);
+            return response.Data.transactionStatus;
         }
     }
 }

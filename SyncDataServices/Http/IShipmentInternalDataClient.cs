@@ -11,5 +11,6 @@ namespace DiAnterExpress.SyncDataServices.Http
         Task<TransactionStatus> CreateShipmentInternal(TransferBalanceDto transferBalanceDto, string token);
         Task<UserToken> LoginUser(LoginUserInput userInput);
         Task<ProfileOutput> GetProfile(string token);
+        Task<TransactionStatus> ShipmentDelivered(int id, string token);
     }
 }

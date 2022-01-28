@@ -7,16 +7,30 @@ using DiAnterExpress.Models;
 using GraphQL;
 using GraphQL.Client.Abstractions;
 using GraphQL.Client.Http;
+using GraphQL.Client.Serializer.Newtonsoft;
+using Microsoft.Extensions.Configuration;
 
 namespace DiAnterExpress.Externals
 {
     public class TokopodiaDataClient : ITokopodiaDataClient
     {
         private GraphQLHttpClient _client;
+        private IConfiguration _configuration;
+        private GraphQLHttpClientOptions graphqlOptions;
 
-        public TokopodiaDataClient(GraphQLHttpClient client)
+        public TokopodiaDataClient(IConfiguration configuration)
         {
-            _client = client;
+            _configuration = configuration;
+
+            graphqlOptions = new GraphQLHttpClientOptions
+            {
+                EndPoint = new Uri(_configuration["TokopodiaURI"], UriKind.Absolute)
+            };
+
+            _client = new GraphQLHttpClient(
+                graphqlOptions,
+                new NewtonsoftJsonSerializer()
+            );
         }
 
         public async Task ShipmentDelivered(int id, string token)
