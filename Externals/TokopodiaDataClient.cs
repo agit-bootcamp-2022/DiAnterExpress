@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using DiAnterExpress.Externals.Dtos;
 using DiAnterExpress.Models;
 using GraphQL;
 using GraphQL.Client.Abstractions;
@@ -16,45 +17,46 @@ namespace DiAnterExpress.Externals
     {
         private GraphQLHttpClient _client;
         private IConfiguration _configuration;
-        private GraphQLHttpClientOptions graphqlOptions;
 
         public TokopodiaDataClient(IConfiguration configuration)
         {
             _configuration = configuration;
 
-            graphqlOptions = new GraphQLHttpClientOptions
-            {
-                EndPoint = new Uri(_configuration["TokopodiaURI"], UriKind.Absolute)
-            };
-
             _client = new GraphQLHttpClient(
-                graphqlOptions,
+                _configuration["TokopodiaURI"],
                 new NewtonsoftJsonSerializer()
             );
         }
 
-        public async Task ShipmentDelivered(int id, string token)
+        public async Task TransactionUpdateStatus(int id, string token)
         {
-            var query = new GraphQLRequest
+            try
             {
-                Query =
-                @"
+                var query = new GraphQLRequest
+                {
+                    Query =
+                    @"
                     mutation {
                         updateTransaction(
                             {
                                 transactionId: $transactionId
                             }
                         )
-                    }
-                ",
-                Variables = new { transactionId = id },
-            };
+                    }",
+                    Variables = new { transactionId = id },
+                };
 
-            _client.HttpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
+                _client.HttpClient.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
 
-            //var response = await _client.SendMutationAsync<>(query);
-            // Nunggu konfirmasi bentuk return datanya kayak gimana
+                var response = await _client.SendMutationAsync<TransactionUpdateReturnDto>(query);
+                if (response.Data.message != "success") throw new Exception("Failed to Update Transaction Status in Tokopodia");
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                throw;
+            }
         }
     }
 }

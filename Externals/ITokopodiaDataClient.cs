@@ -9,6 +9,6 @@ namespace DiAnterExpress.Externals
 {
     public interface ITokopodiaDataClient
     {
-        Task ShipmentDelivered(int id, string token);
+        Task TransactionUpdateStatus(int id, string token);
     }
 }

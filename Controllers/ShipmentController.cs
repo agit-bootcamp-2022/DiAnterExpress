@@ -307,7 +307,7 @@ namespace DiAnterExpress.Controllers
 
                 if (status == Status.Delivered)
                 {
-                    await _tokopodia.ShipmentDelivered(shipment.TransactionId, shipment.TransactionToken);
+                    await _tokopodia.TransactionUpdateStatus(shipment.TransactionId, shipment.TransactionToken);
                     await _http.ShipmentDelivered(shipment.TransactionId, shipment.TransactionToken);
                 }
 
