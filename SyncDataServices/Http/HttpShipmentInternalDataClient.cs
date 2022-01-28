@@ -21,7 +21,6 @@ namespace DiAnterExpress.SyncDataServices.Http
     {
         private readonly GraphQLHttpClient _client;
         private readonly IConfiguration _configuration;
-        private readonly GraphQLHttpClientOptions graphqlOptions;
 
         public HttpShipmentInternalDataClient(IConfiguration configuration)
         {
