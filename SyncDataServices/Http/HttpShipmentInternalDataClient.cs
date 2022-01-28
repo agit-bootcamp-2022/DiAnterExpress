@@ -33,9 +33,11 @@ namespace DiAnterExpress.SyncDataServices.Http
         }
         public async Task<TransactionStatus> CreateShipmentInternal(TransferBalanceDto transferBalanceDto, string token)
         {
-            var query = new GraphQLRequest
+            try
             {
-                Query = @"
+                var query = new GraphQLRequest
+                {
+                    Query = @"
                         mutation ($input: TransferBalanceInput!) {
                             transferBalance(
                                 input: $input
@@ -45,17 +47,24 @@ namespace DiAnterExpress.SyncDataServices.Http
                             }
                         }
                         ",
-                Variables = new { input = transferBalanceDto }
-            };
-            _client.HttpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
-            var response = await _client.SendMutationAsync<object>(query);
-            var stringResult = response.Data.ToString();
-            stringResult = stringResult.Replace($"\"transferBalance\":", string.Empty);
-            stringResult = stringResult.Remove(0, 1);
-            stringResult = stringResult.Remove(stringResult.Length - 1, 1);
-            var result = JsonConvert.DeserializeObject<TransactionStatus>(stringResult);
-            return result;
+                    Variables = new { input = transferBalanceDto }
+                };
+                _client.HttpClient.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+                var response = await _client.SendMutationAsync<object>(query);
+                var stringResult = response.Data.ToString();
+                stringResult = stringResult.Replace($"\"transferBalance\":", string.Empty);
+                stringResult = stringResult.Remove(0, 1);
+                stringResult = stringResult.Remove(stringResult.Length - 1, 1);
+                var result = JsonConvert.DeserializeObject<TransactionStatus>(stringResult);
+                return result;
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                throw;
+            }
+
         }
 
         public async Task<UserToken> LoginUser(LoginUserInput userInput)
