@@ -11,7 +11,7 @@ namespace DiAnterExpress.Models
         [Key]
         public int Id { get; set; }
         public string Product { get; set; }
-        public int PaymmentId { get; set; }
+        public int PaymentId { get; set; }
 
         public Shipment Shipment { get; set; }
     }

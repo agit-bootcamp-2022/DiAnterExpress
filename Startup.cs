@@ -76,7 +76,6 @@ namespace DiAnterExpress
             services.AddScoped<ITransactionInternal, DALTransactionInternal>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            services.AddScoped<IGraphQLClient>(s => new GraphQLHttpClient(Configuration["GraphQLURI"], new NewtonsoftJsonSerializer()));
             services.AddScoped<IShipmentInternalDataClient,HttpShipmentInternalDataClient>();
 
             //AutoMapper
