@@ -37,11 +37,15 @@ namespace DiAnterExpress.Externals
                     Query =
                     @"
                     mutation {
-                        updateTransaction(
+                        updateTransaction( 
+                            input:
                             {
                                 transactionId: $transactionId
                             }
                         )
+                        {
+                            message
+                        }
                     }",
                     Variables = new { transactionId = id },
                 };
@@ -49,8 +53,8 @@ namespace DiAnterExpress.Externals
                 _client.HttpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
 
-                var response = await _client.SendMutationAsync<TransactionUpdateReturnDto>(query);
-                if (response.Data.message != "success") throw new Exception("Failed to Update Transaction Status in Tokopodia");
+                var response = await _client.SendMutationAsync<TokopodiaReturnData>(query);
+                if (response.Data.UpdateTransaction.message != "success") throw new Exception("Failed to Update Transaction Status in Tokopodia");
             }
             catch (System.Exception ex)
             {
