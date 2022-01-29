@@ -128,7 +128,7 @@ namespace DiAnterExpress
 
             app.UseAuthorization();
 
-            RoleInitializer.Seed(serviceProvider).Wait();
+            DbInitializer.Seed(serviceProvider).Wait();
 
             app.UseEndpoints(endpoints =>
             {
