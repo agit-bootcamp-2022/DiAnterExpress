@@ -18,6 +18,7 @@ namespace DiAnterExpress.Dtos
         public double receiverLong { get; set; }
         public double totalWeight { get; set; }
         public int shipmentTypeId { get; set; }
+        public string token { get; set; }
     }
 
     public class DtoShipmentCreateReturn

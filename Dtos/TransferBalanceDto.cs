@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DiAnterExpress.Models;
 
 namespace DiAnterExpress.Dtos
 {
@@ -27,10 +28,12 @@ namespace DiAnterExpress.Dtos
 
     public class ReturnData
     {
+        public string message { get; set; }
         public TransferBalanceOutput TransferBalance { get; set; }
         public TransactionStatus TransactionStatus { get; set; }
         public UserToken LoginUser { get; set; }
         public List<ProfileOutput> ProfileByCustomerIdAsync { get; set; }
+        public TransactionStatus UpdateStatusTransaction { get; set; }
     }
 
     public class UserToken
@@ -59,5 +62,11 @@ namespace DiAnterExpress.Dtos
     public class ResponseProfileOutput
     {
         public ProfileOutput profilOutput { get; set; }
+    }
+
+    public class UpdateStatusTransactionInput
+    {
+        public int transactionId { get; set; }
+        public string transactionStatus { get; set; }
     }
 }

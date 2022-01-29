@@ -254,6 +254,8 @@ namespace DiAnterExpress.Controllers
                             Latitude = input.receiverLat,
                             Longitude = input.receiverLong
                         })).Id,
+
+                    TransactionToken = input.token,
                 };
 
                 var result = await _shipment.Insert(shipmentObj);
@@ -308,7 +310,17 @@ namespace DiAnterExpress.Controllers
                 if (status == Status.Delivered)
                 {
                     await _tokopodia.TransactionUpdateStatus(shipment.TransactionId, shipment.TransactionToken);
-                    await _http.ShipmentDelivered(shipment.TransactionId, shipment.TransactionToken);
+
+                    var userToken = await _http.LoginUser(
+                        new LoginUserInput
+                        {
+                            // TODO move credentials to appsetting?
+                            Username = "Dianter",
+                            Password = "@Pass123",
+                        }
+                    );
+
+                    await _http.UpdateStatusTransaction(shipment.TransactionId, userToken.Token);
                 }
 
                 return Ok(

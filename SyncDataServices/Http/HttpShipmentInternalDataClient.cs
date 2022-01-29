@@ -130,7 +130,7 @@ namespace DiAnterExpress.SyncDataServices.Http
             }
         }
 
-        public async Task<TransactionStatus> ShipmentDelivered(int id, string token)
+        public async Task<TransactionStatus> UpdateStatusTransaction(int id, string token)
         {
             try
             {
@@ -138,26 +138,32 @@ namespace DiAnterExpress.SyncDataServices.Http
                 {
                     Query =
                     @"
-                    mutation {
-                        updateStatusTransaction( 
-                            input:
-                            {
-                                transactionId: $transactionId
-                            }
-                        )
+                    mutation ($input: TransactionUpdateInput!){
+                        updateStatusTransaction(input: $input)
                         {
                             succeed, message
                         }
                     }
                 ",
-                    Variables = new { transactionId = id },
+                    Variables = new
+                    {
+                        input = new UpdateStatusTransactionInput
+                        {
+                            transactionId = id,
+                            transactionStatus = "DELIVERED"
+                        }
+                    },
                 };
 
                 _client.HttpClient.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
 
                 var response = await _client.SendMutationAsync<ReturnData>(query);
-                if (!response.Data.TransactionStatus.Succeed || response.Data.TransactionStatus == null)
+
+                if (!response.Data.UpdateStatusTransaction.Succeed)
+                    throw new Exception(response.Data.UpdateStatusTransaction.Message);
+
+                if (response.Data.UpdateStatusTransaction == null)
                     throw new Exception("Failed to update transaction status to UangTrans");
 
                 return response.Data.TransactionStatus;
