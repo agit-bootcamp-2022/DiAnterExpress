@@ -48,7 +48,7 @@ namespace DiAnterExpress.Controllers
                     Address = input.Address,
                     City = input.City,
                     Phone = input.Phone,
-                    Location = new Point(input.Latitude, input.Longitude) { SRID = 4326 },
+                    Location = new Point(input.Longitude, input.Latitude) { SRID = 4326 },
                     UserId = result.Id
                 };
                 await _branch.Insert(branch);

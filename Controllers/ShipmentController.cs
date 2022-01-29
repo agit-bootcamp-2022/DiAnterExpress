@@ -141,10 +141,10 @@ namespace DiAnterExpress.Controllers
                         {
                             SenderName = input.SenderName,
                             SenderContact = input.SenderContact,
-                            SenderAddress = new Point(input.SenderLocation.Latitude, input.SenderLocation.Longitude) { SRID = 4326 },
+                            SenderAddress = new Point(input.SenderLocation.Longitude, input.SenderLocation.Latitude) { SRID = 4326 },
                             ReceiverName = input.ReceiverName,
                             ReceiverContact = input.ReceiverContact,
-                            ReceiverAddress = new Point(input.ReceiverLocation.Latitude, input.ReceiverLocation.Longitude) { SRID = 4326 },
+                            ReceiverAddress = new Point(input.ReceiverLocation.Longitude, input.ReceiverLocation.Latitude) { SRID = 4326 },
                             TotalWeight = input.TotalWeight,
                             Cost = fee,
                             Status = Status.OrderReceived,
@@ -231,11 +231,11 @@ namespace DiAnterExpress.Controllers
 
                     SenderName = input.senderName,
                     SenderContact = input.senderContact,
-                    SenderAddress = new Point(input.senderLat, input.senderLong) { SRID = 4326 },
+                    SenderAddress = new Point(input.senderLong, input.senderLat) { SRID = 4326 },
 
                     ReceiverName = input.receiverName,
                     ReceiverContact = input.receiverContact,
-                    ReceiverAddress = new Point(input.receiverLat, input.receiverLong) { SRID = 4326 },
+                    ReceiverAddress = new Point(input.receiverLong, input.receiverLat) { SRID = 4326 },
 
                     TotalWeight = input.totalWeight,
                     Cost = totalFee,
