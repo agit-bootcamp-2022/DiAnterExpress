@@ -22,6 +22,8 @@ namespace DiAnterExpress.Data
 
                 await roleManager.CreateAsync(new IdentityRole("Branch"));
 
+                await roleManager.CreateAsync(new IdentityRole("Tokopodia"));
+
                 var newAdmin = new ApplicationUser
                 {
                     UserName = "admin",

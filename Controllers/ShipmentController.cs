@@ -9,12 +9,14 @@ using DiAnterExpress.Dtos;
 using DiAnterExpress.Externals;
 using DiAnterExpress.Models;
 using DiAnterExpress.SyncDataServices.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using NetTopologySuite.Geometries;
 
 namespace DiAnterExpress.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/v1/[controller]")]
     public class ShipmentController : ControllerBase
@@ -40,6 +42,7 @@ namespace DiAnterExpress.Controllers
             _tokopodia = tokopodia;
         }
 
+        [AllowAnonymous]
         [HttpPost("fee")]
         public async Task<ActionResult<ShipmentFeeOutput>> GetShipmentFee(ShipmentFeeInput input)
         {
@@ -64,6 +67,8 @@ namespace DiAnterExpress.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [AllowAnonymous]
         [HttpPost("fee/all")]
         public async Task<ActionResult<IEnumerable<DtoShipmentFeeAllType>>> GetShipmentFeeAllType(ShipmentFeeAllInput input)
         {
@@ -93,6 +98,7 @@ namespace DiAnterExpress.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin, Branch")]
         [HttpPost("internal")]
         public async Task<ActionResult<ShipmentInternalOutput>> CreateShipmentInternal(ShipmentInternalInput input)
         {
@@ -196,6 +202,7 @@ namespace DiAnterExpress.Controllers
             return Ok(_mapper.Map<DtoShipmentOutput>(result));
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}/Status")]
         public async Task<ActionResult<DtoStatus>> GetShipmentStatus(int id)
         {
@@ -206,6 +213,7 @@ namespace DiAnterExpress.Controllers
             return Ok(_mapper.Map<DtoStatus>(result));
         }
 
+        [Authorize(Roles = "Admin, Tokopodia")]
         [HttpPost("tokopodia")]
         public async Task<ActionResult<DtoShipmentCreateReturn>> CreateShipmentTokpod([FromBody] DtoShipmentCreateTokopodia input)
         {
@@ -283,21 +291,30 @@ namespace DiAnterExpress.Controllers
                     Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "")
                 );
 
-                var userId = decodedToken.Claims.Where(
-                    claim => claim.Type == "UserId"
+                var userRole = decodedToken.Claims.Where(
+                    claim => claim.Type.Equals("role")
                 ).First();
 
-                var branch = await _branch.GetByUserId(userId.Value);
                 var shipment = await _shipment.GetById(id);
 
-                if (status == Status.SendingToDestBranch && shipment.BranchSrcId != branch.Id)
-                    return Forbid("Bearer");
+                if (userRole.Value.Equals("Branch"))
+                {
+                    // TODO Create a method for validating ID of JWT Token
+                    var userId = decodedToken.Claims.Where(
+                        claim => claim.Type.Equals("UserId")
+                    ).First();
 
-                if (status == Status.ArrivedAtDestBranch && shipment.BranchDstId != branch.Id)
-                    return Forbid("Bearer");
+                    var branch = await _branch.GetByUserId(userId.Value);
 
-                if (status == Status.Delivered && shipment.BranchDstId != branch.Id)
-                    return Forbid("Bearer");
+                    if (status == Status.SendingToDestBranch && shipment.BranchSrcId != branch.Id)
+                        return Forbid("Bearer");
+
+                    if (status == Status.ArrivedAtDestBranch && shipment.BranchDstId != branch.Id)
+                        return Forbid("Bearer");
+
+                    if (status == Status.Delivered && shipment.BranchDstId != branch.Id)
+                        return Forbid("Bearer");
+                }
 
                 var result = await _shipment.Update(
                     shipment.Id,
