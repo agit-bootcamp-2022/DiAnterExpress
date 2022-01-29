@@ -324,7 +324,7 @@ namespace DiAnterExpress.Controllers
                     }
                 );
 
-                if (status == Status.Delivered)
+                if (status == Status.Delivered && result.TransactionType == TransactionType.Tokopodia)
                 {
                     await _tokopodia.TransactionUpdateStatus(shipment.TransactionId, shipment.TransactionToken);
 
