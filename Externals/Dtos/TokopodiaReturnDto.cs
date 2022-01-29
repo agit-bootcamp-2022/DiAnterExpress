@@ -15,5 +15,9 @@ namespace DiAnterExpress.Externals.Dtos
         public string message { get; set; }
     }
 
+    public class TransactionUpdateInputDto
+    {
+        public int transactionId { get; set; }
+    }
 
 }
