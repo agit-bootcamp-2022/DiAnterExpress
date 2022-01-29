@@ -8,7 +8,7 @@ using static Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExte
 
 namespace DiAnterExpress.Data
 {
-    public class RoleInitializer
+    public class DbInitializer
     {
         public async static Task Seed(IServiceProvider service)
         {
