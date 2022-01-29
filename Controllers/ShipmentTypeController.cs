@@ -6,12 +6,14 @@ using AutoMapper;
 using DiAnterExpress.Data;
 using DiAnterExpress.Dtos;
 using DiAnterExpress.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DiAnterExpress.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/Shipment/Type")]
     public class ShipmentTypeController : ControllerBase
     {
         private IShipmentType _shipmentType;
@@ -23,6 +25,7 @@ namespace DiAnterExpress.Controllers
             _mapper = mapper;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DtoShipmentType>>> Get()
         {
@@ -39,6 +42,7 @@ namespace DiAnterExpress.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<DtoShipmentType>> GetById(int id)
         {
