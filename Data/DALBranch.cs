@@ -56,7 +56,7 @@ namespace DiAnterExpress.Data
         {
             try
             {
-                var locationPoint = new Point(location.Latitude, location.Longitude) { SRID = 4326 };
+                var locationPoint = new Point(location.Longitude, location.Latitude) { SRID = 4326 };
 
                 var nearestBranch = await _db.Branches.OrderBy(
                     b => b.Location.Distance(locationPoint)
