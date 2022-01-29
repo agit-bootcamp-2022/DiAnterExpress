@@ -139,7 +139,7 @@ namespace DiAnterExpress.Controllers
                         var transactionInternal = new TransactionInternal
                         {
                             Product = input.Product,
-                            PaymentId = 0 //TODO Update PaymentId from UangTrans
+                            PaymentId = httpRequest.ReceiverWalletMutationId
                         };
                         var transactionId = await _transactionInternal.Insert(transactionInternal);
 
