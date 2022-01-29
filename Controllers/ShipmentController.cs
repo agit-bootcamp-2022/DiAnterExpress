@@ -44,7 +44,7 @@ namespace DiAnterExpress.Controllers
 
         [AllowAnonymous]
         [HttpPost("fee")]
-        public async Task<ActionResult<ShipmentFeeOutput>> GetShipmentFee(ShipmentFeeInput input)
+        public async Task<ActionResult<ReturnSuccessDto<ShipmentFeeOutput>>> GetShipmentFee(ShipmentFeeInput input)
         {
             try
             {
@@ -52,25 +52,41 @@ namespace DiAnterExpress.Controllers
                 if (shipmentType != null)
                 {
                     var fee = await _shipment.GetShipmentFee(input, shipmentType.CostPerKm, shipmentType.CostPerKg);
-                    return Ok(new ShipmentFeeOutput
-                    {
-                        Fee = fee
-                    });
+                    return Ok(
+                        new ReturnSuccessDto<ShipmentFeeOutput>
+                        {
+                            data = new ShipmentFeeOutput
+                            {
+                                Fee = fee
+                            }
+                        }
+                    );
                 }
                 else
                 {
-                    return NotFound();
+                    return NotFound(
+                        new ReturnErrorDto
+                        {
+                            message = "Shipment Type not found"
+                        }
+                    );
                 }
             }
             catch (System.Exception ex)
             {
-                return BadRequest(ex.Message);
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
 
         [AllowAnonymous]
         [HttpPost("fee/all")]
-        public async Task<ActionResult<IEnumerable<DtoShipmentFeeAllType>>> GetShipmentFeeAllType(ShipmentFeeAllInput input)
+        public async Task<ActionResult<ReturnSuccessDto<IEnumerable<DtoShipmentFeeAllType>>>> GetShipmentFeeAllType(ShipmentFeeAllInput input)
         {
             try
             {
@@ -90,17 +106,28 @@ namespace DiAnterExpress.Controllers
                         });
                     }
                 }
-                return Ok(response);
+                return Ok(
+                    new ReturnSuccessDto<IEnumerable<DtoShipmentFeeAllType>>
+                    {
+                        data = response
+                    }
+                );
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
 
         [Authorize(Roles = "Admin, Branch")]
         [HttpPost("internal")]
-        public async Task<ActionResult<ShipmentInternalOutput>> CreateShipmentInternal(ShipmentInternalInput input)
+        public async Task<ActionResult<ReturnSuccessDto<ShipmentInternalOutput>>> CreateShipmentInternal(ShipmentInternalInput input)
         {
             try
             {
@@ -161,61 +188,99 @@ namespace DiAnterExpress.Controllers
                             BranchSrcId = (await _branch.GetNearestByLocation(input.SenderLocation)).Id,
                             BranchDstId = (await _branch.GetNearestByLocation(input.ReceiverLocation)).Id,
                         };
+
                         var shipmentResult = await _shipment.Insert(shipment);
-                        return Ok(new ShipmentInternalOutput
-                        {
-                            ShipmentId = shipmentResult.Id,
-                            StatusOrder = shipment.Status.ToString()
-                        });
+
+                        return Ok(
+                            new ReturnSuccessDto<ShipmentInternalOutput>
+                            {
+                                data = new ShipmentInternalOutput
+                                {
+                                    ShipmentId = shipmentResult.Id,
+                                    StatusOrder = shipment.Status.ToString()
+                                }
+                            }
+                        );
                     }
                     else
                     {
-                        return BadRequest();
+                        return BadRequest(
+                            new ReturnErrorDto
+                            {
+                                message = ""
+                            }
+                        );
                     }
                 }
                 else
                 {
-                    return NotFound();
+                    return NotFound(
+                        new ReturnErrorDto
+                        {
+
+                        }
+                    );
                 }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ToString());
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DtoShipmentOutput>>> GetAllShipment()
+        public async Task<ActionResult<ReturnSuccessDto<IEnumerable<DtoShipmentOutput>>>> GetAllShipment()
         {
             var result = await _shipment.GetAll();
             var dtos = _mapper.Map<IEnumerable<DtoShipmentOutput>>(result);
-            return Ok(dtos);
+            return Ok(
+                new ReturnSuccessDto<IEnumerable<DtoShipmentOutput>>
+                {
+                    data = dtos
+                }
+            );
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<DtoShipmentOutput>> GetShipmentById(int id)
+        public async Task<ActionResult<ReturnSuccessDto<DtoShipmentOutput>>> GetShipmentById(int id)
         {
             var result = await _shipment.GetById(id);
             if (result == null)
                 return NotFound();
 
-            return Ok(_mapper.Map<DtoShipmentOutput>(result));
+            return Ok(
+                new ReturnSuccessDto<DtoShipmentOutput>
+                {
+                    data = _mapper.Map<DtoShipmentOutput>(result)
+                }
+            );
         }
 
         [AllowAnonymous]
         [HttpGet("{id}/Status")]
-        public async Task<ActionResult<DtoStatus>> GetShipmentStatus(int id)
+        public async Task<ActionResult<ReturnSuccessDto<DtoStatus>>> GetShipmentStatus(int id)
         {
             var result = await _shipment.GetById(id);
             if (result == null)
                 return NotFound();
 
-            return Ok(_mapper.Map<DtoStatus>(result));
+            return Ok(
+                new ReturnSuccessDto<DtoStatus>
+                {
+                    data = _mapper.Map<DtoStatus>(result)
+                }
+            );
         }
 
         [Authorize(Roles = "Admin, Tokopodia")]
         [HttpPost("tokopodia")]
-        public async Task<ActionResult<DtoShipmentCreateReturn>> CreateShipmentTokpod([FromBody] DtoShipmentCreateTokopodia input)
+        public async Task<ActionResult<ReturnSuccessDto<DtoShipmentCreateReturn>>> CreateShipmentTokpod([FromBody] DtoShipmentCreateTokopodia input)
         {
             try
             {
@@ -269,21 +334,30 @@ namespace DiAnterExpress.Controllers
                 var result = await _shipment.Insert(shipmentObj);
 
                 return Ok(
-                    new DtoShipmentCreateReturn
+                    new ReturnSuccessDto<DtoShipmentCreateReturn>
                     {
-                        shipmentId = result.Id,
-                        statusOrder = result.Status.ToString()
+                        data = new DtoShipmentCreateReturn
+                        {
+                            shipmentId = result.Id,
+                            statusOrder = result.Status.ToString()
+                        }
                     }
                 );
             }
             catch (System.Exception ex)
             {
-                return BadRequest(ex.ToString());
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
 
         [HttpPatch("{id}/Status/{status}")]
-        public async Task<ActionResult<DtoStatus>> UpdateShipmentStatus(int id, Status status)
+        public async Task<ActionResult<ReturnSuccessDto<DtoStatus>>> UpdateShipmentStatus(int id, Status status)
         {
             try
             {
@@ -341,16 +415,25 @@ namespace DiAnterExpress.Controllers
                 }
 
                 return Ok(
-                    new DtoStatus
+                    new ReturnSuccessDto<DtoStatus>
                     {
-                        Id = shipment.Id,
-                        Status = result.Status.ToString(),
+                        data = new DtoStatus
+                        {
+                            Id = shipment.Id,
+                            Status = result.Status.ToString(),
+                        }
                     }
                 );
             }
             catch (System.Exception ex)
             {
-                return BadRequest(ex.ToString());
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
     }
