@@ -8,8 +8,9 @@ namespace DiAnterExpress.SyncDataServices.Http
 {
     public interface IShipmentInternalDataClient
     {
-        Task<TransactionStatus> CreateShipmentInternal(TransferBalanceDto transferBalanceDto, string token);
+        Task<TransferBalanceOutput> CreateShipmentInternal(TransferBalanceDto transferBalanceDto, string token);
         Task<UserToken> LoginUser(LoginUserInput userInput);
         Task<ProfileOutput> GetProfile(string token);
+        Task<TransactionStatus> UpdateStatusTransaction(int id, string token);
     }
 }

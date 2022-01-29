@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AuthService.Data;
 using DiAnterExpress.Data;
+using DiAnterExpress.Externals;
 using DiAnterExpress.Models;
 using DiAnterExpress.SyncDataServices.Http;
 using GraphQL.Client.Abstractions;
@@ -76,7 +77,8 @@ namespace DiAnterExpress
             services.AddScoped<ITransactionInternal, DALTransactionInternal>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            services.AddScoped<IShipmentInternalDataClient,HttpShipmentInternalDataClient>();
+            services.AddScoped<IShipmentInternalDataClient, HttpShipmentInternalDataClient>();
+            services.AddScoped<ITokopodiaDataClient, TokopodiaDataClient>();
 
             //AutoMapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -132,7 +134,7 @@ namespace DiAnterExpress
                 endpoints.MapControllers();
             });
 
-            
+
         }
     }
 }

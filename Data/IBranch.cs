@@ -11,5 +11,6 @@ namespace DiAnterExpress.Data
     {
         Task DeleteById(int id);
         Task<Branch> GetNearestByLocation(Location location);
+        Task<Branch> GetByUserId(string id);
     }
 }
