@@ -19,7 +19,9 @@ namespace DiAnterExpress.Profiles
             .ForMember(dst => dst.ReceiverAddress,
                 opt => opt.MapFrom(src => new location { Lat = src.ReceiverAddress.X, Long = src.ReceiverAddress.Y }))
             .ForMember(dst => dst.Status,
-                opt => opt.MapFrom(src => (Status)src.Status));
+                opt => opt.MapFrom(src => (Status)src.Status))
+            .ForMember(dst => dst.TransactionType,
+                opt => opt.MapFrom(src => (TransactionType)src.TransactionType));
 
             CreateMap<ShipmentFeeAllInput, ShipmentFeeInput>();
         }

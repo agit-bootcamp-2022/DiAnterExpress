@@ -14,12 +14,14 @@ namespace DiAnterExpress.Dtos
         public string ReceiverName { get; set; }
         public string ReceiverContact { get; set; }
         public location ReceiverAddress { get; set; }
-        public int ShipmentId { get; set; }
-        public string ShipmentType { get; set; }
-        public string Product { get; set; }
         public double TotalWeight { get; set; }
         public double Cost { get; set; }
         public string Status { get; set; }
+        public string TransactionType { get; set; }
+        public int TransactionId { get; set; }
+        public int ShipmentTypeId { get; set; }
+        public int BranchSrcId { get; set; }
+        public int BranchDstId { get; set; }
 
     }
 
