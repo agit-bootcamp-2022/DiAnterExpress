@@ -30,14 +30,19 @@ namespace DiAnterExpress.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public ActionResult<ApplicationUser> GetAllUser()
+        public ActionResult<ReturnSuccessDto<IEnumerable<ApplicationUser>>> GetAllUser()
         {
             var result = _user.GetAllUser();
-            return Ok(result);
+            return Ok(
+                new ReturnSuccessDto<IEnumerable<ApplicationUser>>
+                {
+                    data = result
+                }
+            );
         }
 
         [HttpPost("Registration/Branch")]
-        public async Task<ActionResult<string>> RegistrationBranch(DtoUserInputBranch input)
+        public async Task<ActionResult<ReturnSuccessDto<string>>> RegistrationBranch(DtoUserInputBranch input)
         {
             try
             {
@@ -52,42 +57,73 @@ namespace DiAnterExpress.Controllers
                     UserId = result.Id
                 };
                 await _branch.Insert(branch);
-                return Ok("Berhasil register");
+                return Ok(
+                    new ReturnSuccessDto<string>
+                    {
+                        data = "Berhasil register"
+                    }
+                );
             }
             catch (System.Exception ex)
             {
-                return BadRequest(ex.Message);
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
 
         [HttpPost("Authentication")]
-        public async Task<ActionResult<ApplicationUser>> Authentication([FromBody] DtoUserCredentials credentials)
+        public async Task<ActionResult<ReturnSuccessDto<string>>> Authentication([FromBody] DtoUserCredentials credentials)
         {
             try
             {
                 var user = await _user.Authentication(credentials.Username, credentials.Password);
 
-                return Ok(user);
+                return Ok(
+                    new ReturnSuccessDto<string>
+                    {
+                        data = user
+                    }
+                );
             }
             catch (System.Exception ex)
             {
-                return BadRequest(ex.Message);
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
 
         [Authorize(Roles = "Admin")]
         [HttpGet("servicetoken/{role}")]
-        public ActionResult<string> GetServiceToken(string role)
+        public ActionResult<ReturnSuccessDto<string>> GetServiceToken(string role)
         {
             try
             {
                 return Ok(
-                    _user.GenerateServiceToken(role)
+                    new ReturnSuccessDto<string>
+                    {
+                        data = _user.GenerateServiceToken(role)
+                    }
                 );
             }
             catch (System.Exception ex)
             {
-                return BadRequest(ex.Message);
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
             }
         }
     }
