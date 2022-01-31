@@ -80,7 +80,7 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ReturnSuccessDto<ShipmentType>>> Post([FromBody] ShipmentTypeInsertDto obj)
+        public async Task<ActionResult<ReturnSuccessDto<DtoShipmentType>>> Post([FromBody] ShipmentTypeInsertDto obj)
         {
             try
             {
