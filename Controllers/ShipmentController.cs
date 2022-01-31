@@ -85,7 +85,8 @@ namespace DiAnterExpress.Controllers
             try
             {
                 var shipmentTypes = await _shipmentType.GetAll();
-                if (!shipmentTypes.Any()) return NotFound("ShipmentType kosong");
+                if (!shipmentTypes.Any())
+                    return NotFound(new ReturnErrorDto { message = "ShipmentType kosong" });
 
                 var newInput = _mapper.Map<ShipmentFeeInsertDto>(input);
                 var response = new List<ShipmentFeeAllTypeOutputDto>();
@@ -157,51 +158,48 @@ namespace DiAnterExpress.Controllers
                 };
 
                 var httpRequest = await _uangTrans.CreateShipmentInternal(inputHttp, token.Token);
-                if (httpRequest.Succeed == true)
+
+                if (!httpRequest.Succeed)
+                    return BadRequest(new ReturnErrorDto { message = httpRequest.Message });
+
+                var transactionInternal = new TransactionInternal
                 {
-                    var transactionInternal = new TransactionInternal
+                    Product = input.Product,
+                    PaymentId = 0 //TODO Update PaymentId from UangTrans
+                };
+                var transactionId = await _transactionInternal.Insert(transactionInternal);
+
+                var shipment = new Shipment
+                {
+                    SenderName = input.SenderName,
+                    SenderContact = input.SenderContact,
+                    SenderAddress = new Point(input.SenderLocation.Longitude, input.SenderLocation.Latitude) { SRID = 4326 },
+                    ReceiverName = input.ReceiverName,
+                    ReceiverContact = input.ReceiverContact,
+                    ReceiverAddress = new Point(input.ReceiverLocation.Longitude, input.ReceiverLocation.Latitude) { SRID = 4326 },
+                    TotalWeight = input.TotalWeight,
+                    Cost = fee,
+                    Status = Status.OrderReceived,
+                    TransactionType = TransactionType.Internal,
+                    TransactionId = transactionId.Id,
+                    TransactionToken = token.Token,
+                    ShipmentTypeId = input.ShipmentTypeId,
+                    BranchSrcId = (await _branch.GetNearestByLocation(input.SenderLocation)).Id,
+                    BranchDstId = (await _branch.GetNearestByLocation(input.ReceiverLocation)).Id,
+                };
+
+                var shipmentResult = await _shipment.Insert(shipment);
+
+                return Ok(
+                    new ReturnSuccessDto<ShipmentInternalOutputDto>
                     {
-                        Product = input.Product,
-                        PaymentId = 0 //TODO Update PaymentId from UangTrans
-                    };
-                    var transactionId = await _transactionInternal.Insert(transactionInternal);
-
-                    var shipment = new Shipment
-                    {
-                        SenderName = input.SenderName,
-                        SenderContact = input.SenderContact,
-                        SenderAddress = new Point(input.SenderLocation.Longitude, input.SenderLocation.Latitude) { SRID = 4326 },
-                        ReceiverName = input.ReceiverName,
-                        ReceiverContact = input.ReceiverContact,
-                        ReceiverAddress = new Point(input.ReceiverLocation.Longitude, input.ReceiverLocation.Latitude) { SRID = 4326 },
-                        TotalWeight = input.TotalWeight,
-                        Cost = fee,
-                        Status = Status.OrderReceived,
-                        TransactionType = TransactionType.Internal,
-                        TransactionId = transactionId.Id,
-                        TransactionToken = token.Token,
-                        ShipmentTypeId = input.ShipmentTypeId,
-                        BranchSrcId = (await _branch.GetNearestByLocation(input.SenderLocation)).Id,
-                        BranchDstId = (await _branch.GetNearestByLocation(input.ReceiverLocation)).Id,
-                    };
-
-                    var shipmentResult = await _shipment.Insert(shipment);
-
-                    return Ok(
-                        new ReturnSuccessDto<ShipmentInternalOutputDto>
+                        data = new ShipmentInternalOutputDto
                         {
-                            data = new ShipmentInternalOutputDto
-                            {
-                                ShipmentId = shipmentResult.Id,
-                                StatusOrder = shipment.Status.ToString()
-                            }
+                            ShipmentId = shipmentResult.Id,
+                            StatusOrder = shipment.Status.ToString()
                         }
-                    );
-                }
-                else
-                {
-                    return BadRequest();
-                }
+                    }
+                );
             }
             catch (Exception ex)
             {
