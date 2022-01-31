@@ -77,7 +77,7 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpPost("Authentication")]
-        public async Task<ActionResult<ReturnSuccessDto<ApplicationUser>>> Authentication([FromBody] UserCredentialsDto credentials)
+        public async Task<ActionResult<ReturnSuccessDto<string>>> Authentication([FromBody] UserCredentialsDto credentials)
         {
             try
             {
