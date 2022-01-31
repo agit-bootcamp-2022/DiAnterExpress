@@ -23,8 +23,6 @@ namespace DiAnterExpress.Data
             {
                 var result = await GetById(id);
 
-                if (result == null) throw new Exception("Data tidak ditemukan!");
-
                 _db.Branches.Remove(result);
                 await _db.SaveChangesAsync();
 
