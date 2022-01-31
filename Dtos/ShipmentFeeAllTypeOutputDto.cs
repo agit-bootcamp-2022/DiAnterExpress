@@ -1,6 +1,6 @@
 ﻿namespace DiAnterExpress.Dtos
 {
-    public class DtoShipmentFeeAllType
+    public class ShipmentFeeAllTypeOutputDto
     {
         public int Id { get; set; }
         public string Name { get; set; }

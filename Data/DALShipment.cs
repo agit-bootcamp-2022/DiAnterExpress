@@ -30,14 +30,16 @@ namespace DiAnterExpress.Data
 
         public async Task<Shipment> GetById(int id)
         {
-            var result = await _db.Shipments.Where(s => s.Id == Convert.ToInt32(id)).SingleOrDefaultAsync<Shipment>();
-            if (result != null)
-                return result;
-            else
-                throw new Exception("Data tidak ditemukan !");
+            var result = await _db.Shipments.Where(
+                shipment => shipment.Id == id
+            ).SingleOrDefaultAsync();
+
+            if (result != null) throw new Exception("Shipment tidak ditemukan!");
+
+            return result;
         }
 
-        public Task<double> GetShipmentFee(ShipmentFeeInput input, double costPerKm, double costPerKg)
+        public Task<double> GetShipmentFee(ShipmentFeeInsertDto input, double costPerKm, double costPerKg)
         {
             var senderLocation = new Point(input.SenderLong, input.SenderLat) { SRID = 4326 };
             var receiverLocation = new Point(input.ReceiverLong, input.ReceiverLat) { SRID = 4326 };

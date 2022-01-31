@@ -13,7 +13,7 @@ namespace DiAnterExpress.Profiles
     {
         public ShipmentProfile()
         {
-            CreateMap<Shipment, DtoShipmentOutput>()
+            CreateMap<Shipment, ShipmentOutputDto>()
             .ForMember(dst => dst.SenderAddress,
                 opt => opt.MapFrom(src => new location { Lat = src.SenderAddress.X, Long = src.SenderAddress.Y }))
             .ForMember(dst => dst.ReceiverAddress,
@@ -23,7 +23,7 @@ namespace DiAnterExpress.Profiles
             .ForMember(dst => dst.TransactionType,
                 opt => opt.MapFrom(src => (TransactionType)src.TransactionType));
 
-            CreateMap<ShipmentFeeAllInput, ShipmentFeeInput>();
+            CreateMap<ShipmentFeeAllTypeInsertDto, ShipmentFeeInsertDto>();
         }
     }
 }

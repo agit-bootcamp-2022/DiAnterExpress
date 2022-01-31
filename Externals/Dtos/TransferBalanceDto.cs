@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DiAnterExpress.Models;
 
-namespace DiAnterExpress.Dtos
+namespace DiAnterExpress.Externals.Dtos
 {
     public class TransferBalanceDto
     {

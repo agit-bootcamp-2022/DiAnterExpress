@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace DiAnterExpress.Dtos
 {
-    public class ShipmentFeeOutput
+    public class ShipmentInternalOutputDto
     {
-        public double Fee { get; set; }
+        public int ShipmentId { get; set; }
+        public string StatusOrder { get; set; }
     }
 }

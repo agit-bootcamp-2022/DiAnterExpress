@@ -1,6 +1,6 @@
 ﻿namespace DiAnterExpress.Dtos
 {
-    public class CreateShipmentType
+    public class ShipmentTypeInsertDto
     {
         public string Name { get; set; }
         public double CostPerKg { get; set; }

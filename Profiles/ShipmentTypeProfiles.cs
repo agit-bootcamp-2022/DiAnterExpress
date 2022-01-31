@@ -9,7 +9,7 @@ namespace DiAnterExpress.Profiles
         public ShipmentTypeProfiles()
         {
             CreateMap<ShipmentType, DtoShipmentType>();
-            CreateMap<CreateShipmentType, ShipmentType>();
+            CreateMap<ShipmentTypeInsertDto, ShipmentType>();
         }
     }
 }

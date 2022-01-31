@@ -28,12 +28,12 @@ namespace DiAnterExpress.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<ReturnSuccessDto<IEnumerable<BranchDto>>>> GetAll()
+        public async Task<ActionResult<ReturnSuccessDto<IEnumerable<BranchOutputDto>>>> GetAll()
         {
-            var drivers = await _branch.GetAll();
-            var dtos = _mapper.Map<IEnumerable<BranchDto>>(drivers);
+            var branches = await _branch.GetAll();
+            var dtos = _mapper.Map<IEnumerable<BranchOutputDto>>(branches);
             return Ok(
-                new ReturnSuccessDto<IEnumerable<BranchDto>>
+                new ReturnSuccessDto<IEnumerable<BranchOutputDto>>
                 {
                     data = dtos
                 }
@@ -42,15 +42,15 @@ namespace DiAnterExpress.Controllers
 
         [AllowAnonymous]
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReturnSuccessDto<BranchDto>>> GetBranchById(int id)
+        public async Task<ActionResult<ReturnSuccessDto<BranchOutputDto>>> GetBranchById(int id)
         {
             try
             {
                 var result = await _branch.GetById(id);
                 return Ok(
-                    new ReturnSuccessDto<BranchDto>
+                    new ReturnSuccessDto<BranchOutputDto>
                     {
-                        data = _mapper.Map<BranchDto>(result)
+                        data = _mapper.Map<BranchOutputDto>(result)
                     }
                 );
             }
@@ -67,7 +67,7 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ReturnSuccessDto<string>>> Put(int id, [FromBody] BranchCreateDto branchCreateDto)
+        public async Task<ActionResult<ReturnSuccessDto<string>>> UpdateBranch(int id, [FromBody] BranchInsertDto input)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace DiAnterExpress.Controllers
                     if (currentBranchId.Id != id) return Forbid("Bearer");
                 }
 
-                var branch = _mapper.Map<Branch>(branchCreateDto);
+                var branch = _mapper.Map<Branch>(input);
                 var result = await _branch.Update(id, branch);
                 return Ok(
                     new ReturnSuccessDto<string>
@@ -118,7 +118,7 @@ namespace DiAnterExpress.Controllers
         {
             try
             {
-                await _branch.DeleteById(id);
+                await _branch.Delete(id);
                 return Ok(
                     new ReturnSuccessDto<string>
                     {

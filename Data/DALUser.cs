@@ -67,8 +67,6 @@ namespace AuthService.Data
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
 
-            user.Token = tokenString;
-
             return tokenString;
         }
 
@@ -92,6 +90,7 @@ namespace AuthService.Data
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var tokenString = tokenHandler.WriteToken(token);
+
             return tokenString;
         }
 
@@ -118,7 +117,7 @@ namespace AuthService.Data
             return roles;
         }
 
-        public async Task<ApplicationUser> Insert(DtoUserRegister input)
+        public async Task<ApplicationUser> Insert(UserInsertDto input)
         {
             try
             {
@@ -131,10 +130,7 @@ namespace AuthService.Data
 
                 if (!result.Succeeded) throw new Exception($"Failed to create user: {result.ToString()}");
 
-                if (input.Role == role.branch)
-                {
-                    await _um.AddToRoleAsync(newUser, "Branch");
-                }
+                if (input.Role == role.branch) await _um.AddToRoleAsync(newUser, "Branch");
 
                 return newUser;
             }

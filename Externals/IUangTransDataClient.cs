@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DiAnterExpress.Dtos;
+using DiAnterExpress.Externals.Dtos;
 
-namespace DiAnterExpress.SyncDataServices.Http
+namespace DiAnterExpress.Externals
 {
-    public interface IShipmentInternalDataClient
+    public interface IUangTransDataClient
     {
         Task<TransferBalanceOutput> CreateShipmentInternal(TransferBalanceDto transferBalanceDto, string token);
         Task<UserToken> LoginUser(LoginUserInput userInput);

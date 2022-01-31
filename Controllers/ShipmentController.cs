@@ -8,11 +8,11 @@ using DiAnterExpress.Data;
 using DiAnterExpress.Dtos;
 using DiAnterExpress.Externals;
 using DiAnterExpress.Models;
-using DiAnterExpress.SyncDataServices.Http;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using NetTopologySuite.Geometries;
+using DiAnterExpress.Externals.Dtos;
 
 namespace DiAnterExpress.Controllers
 {
@@ -24,19 +24,25 @@ namespace DiAnterExpress.Controllers
         private readonly IShipmentType _shipmentType;
         private readonly IShipment _shipment;
         private readonly IMapper _mapper;
-        private readonly IShipmentInternalDataClient _http;
+        private readonly IUangTransDataClient _uangTrans;
         private readonly ITransactionInternal _transactionInternal;
         private readonly IBranch _branch;
         private readonly ITokopodiaDataClient _tokopodia;
 
-        public ShipmentController(IShipmentType shipmentType,
-            IShipment shipment, IMapper mapper, IShipmentInternalDataClient http,
-            ITransactionInternal transactionInternal, IBranch branch, ITokopodiaDataClient tokopodia)
+        public ShipmentController(
+            IShipmentType shipmentType,
+            IShipment shipment,
+            IMapper mapper,
+            IUangTransDataClient uangTrans,
+            ITransactionInternal transactionInternal,
+            IBranch branch,
+            ITokopodiaDataClient tokopodia
+        )
         {
             _shipmentType = shipmentType;
             _shipment = shipment;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _http = http;
+            _uangTrans = uangTrans;
             _transactionInternal = transactionInternal;
             _branch = branch;
             _tokopodia = tokopodia;
@@ -44,33 +50,21 @@ namespace DiAnterExpress.Controllers
 
         [AllowAnonymous]
         [HttpPost("fee")]
-        public async Task<ActionResult<ReturnSuccessDto<ShipmentFeeOutput>>> GetShipmentFee(ShipmentFeeInput input)
+        public async Task<ActionResult<ReturnSuccessDto<ShipmentFeeOutputDto>>> GetShipmentFee(ShipmentFeeInsertDto input)
         {
             try
             {
                 var shipmentType = await _shipmentType.GetById(input.ShipmentTypeId);
-                if (shipmentType != null)
-                {
-                    var fee = await _shipment.GetShipmentFee(input, shipmentType.CostPerKm, shipmentType.CostPerKg);
-                    return Ok(
-                        new ReturnSuccessDto<ShipmentFeeOutput>
+                var fee = await _shipment.GetShipmentFee(input, shipmentType.CostPerKm, shipmentType.CostPerKg);
+                return Ok(
+                    new ReturnSuccessDto<ShipmentFeeOutputDto>
+                    {
+                        data = new ShipmentFeeOutputDto
                         {
-                            data = new ShipmentFeeOutput
-                            {
-                                Fee = fee
-                            }
+                            Fee = fee
                         }
-                    );
-                }
-                else
-                {
-                    return NotFound(
-                        new ReturnErrorDto
-                        {
-                            message = "Shipment Type not found"
-                        }
-                    );
-                }
+                    }
+                );
             }
             catch (System.Exception ex)
             {
@@ -86,28 +80,31 @@ namespace DiAnterExpress.Controllers
 
         [AllowAnonymous]
         [HttpPost("fee/all")]
-        public async Task<ActionResult<ReturnSuccessDto<IEnumerable<DtoShipmentFeeAllType>>>> GetShipmentFeeAllType(ShipmentFeeAllInput input)
+        public async Task<ActionResult<ReturnSuccessDto<IEnumerable<ShipmentFeeAllTypeOutputDto>>>> GetShipmentFeeAllType(ShipmentFeeAllTypeInsertDto input)
         {
             try
             {
-                var newInput = _mapper.Map<ShipmentFeeInput>(input);
                 var shipmentTypes = await _shipmentType.GetAll();
-                var response = new List<DtoShipmentFeeAllType>();
-                if (shipmentTypes != null)
+                if (!shipmentTypes.Any())
+                    return NotFound(new ReturnErrorDto { message = "ShipmentType kosong" });
+
+                var newInput = _mapper.Map<ShipmentFeeInsertDto>(input);
+                var response = new List<ShipmentFeeAllTypeOutputDto>();
+
+                foreach (var shipmentType in shipmentTypes)
                 {
-                    foreach (var shipmentType in shipmentTypes)
-                    {
-                        var fee = await _shipment.GetShipmentFee(newInput, shipmentType.CostPerKm, shipmentType.CostPerKg);
-                        response.Add(new DtoShipmentFeeAllType
+                    var fee = await _shipment.GetShipmentFee(newInput, shipmentType.CostPerKm, shipmentType.CostPerKg);
+                    response.Add(
+                        new ShipmentFeeAllTypeOutputDto
                         {
                             Id = shipmentType.Id,
                             Name = shipmentType.Name,
                             TotalFee = fee
-                        });
-                    }
+                        }
+                    );
                 }
                 return Ok(
-                    new ReturnSuccessDto<IEnumerable<DtoShipmentFeeAllType>>
+                    new ReturnSuccessDto<IEnumerable<ShipmentFeeAllTypeOutputDto>>
                     {
                         data = response
                     }
@@ -127,100 +124,82 @@ namespace DiAnterExpress.Controllers
 
         [Authorize(Roles = "Admin, Branch")]
         [HttpPost("internal")]
-        public async Task<ActionResult<ReturnSuccessDto<ShipmentInternalOutput>>> CreateShipmentInternal(ShipmentInternalInput input)
+        public async Task<ActionResult<ReturnSuccessDto<ShipmentInternalOutputDto>>> CreateShipmentInternal(ShipmentInternalInsertDto input)
         {
             try
             {
                 var shipmentType = await _shipmentType.GetById(input.ShipmentTypeId);
-                if (shipmentType != null)
+
+                var mapCost = new ShipmentFeeInsertDto
                 {
-                    var mapCost = new ShipmentFeeInput
-                    {
-                        SenderLat = input.SenderLocation.Latitude,
-                        SenderLong = input.SenderLocation.Longitude,
-                        ReceiverLat = input.ReceiverLocation.Latitude,
-                        ReceiverLong = input.ReceiverLocation.Longitude,
-                        Weight = input.TotalWeight,
-                        ShipmentTypeId = input.ShipmentTypeId
-                    };
-                    var fee = await _shipment.GetShipmentFee(mapCost, shipmentType.CostPerKm, shipmentType.CostPerKg);
+                    SenderLat = input.SenderLocation.Latitude,
+                    SenderLong = input.SenderLocation.Longitude,
+                    ReceiverLat = input.ReceiverLocation.Latitude,
+                    ReceiverLong = input.ReceiverLocation.Longitude,
+                    Weight = input.TotalWeight,
+                    ShipmentTypeId = input.ShipmentTypeId
+                };
 
-                    var loginUser = new LoginUserInput
-                    {
-                        Username = input.UserCredential.UangTransUsername,
-                        Password = input.UserCredential.UangTransPassword
-                    };
-                    var token = await _http.LoginUser(loginUser);
-                    var customerId = await _http.GetProfile(token.Token);
+                var fee = await _shipment.GetShipmentFee(mapCost, shipmentType.CostPerKm, shipmentType.CostPerKg);
 
-                    var inputHttp = new TransferBalanceDto
-                    {
-                        CustomerDebitId = customerId.Id,
-                        Amount = fee,
-                        CustomerCreditId = 5 //5 is AnterAja Id in UangTrans Service
-                    };
-
-                    var httpRequest = await _http.CreateShipmentInternal(inputHttp, token.Token);
-                    if (httpRequest.Succeed == true)
-                    {
-                        var transactionInternal = new TransactionInternal
-                        {
-                            Product = input.Product,
-                            PaymentId = httpRequest.ReceiverWalletMutationId
-                        };
-                        var transactionId = await _transactionInternal.Insert(transactionInternal);
-
-                        var shipment = new Shipment
-                        {
-                            SenderName = input.SenderName,
-                            SenderContact = input.SenderContact,
-                            SenderAddress = new Point(input.SenderLocation.Longitude, input.SenderLocation.Latitude) { SRID = 4326 },
-                            ReceiverName = input.ReceiverName,
-                            ReceiverContact = input.ReceiverContact,
-                            ReceiverAddress = new Point(input.ReceiverLocation.Longitude, input.ReceiverLocation.Latitude) { SRID = 4326 },
-                            TotalWeight = input.TotalWeight,
-                            Cost = fee,
-                            Status = Status.OrderReceived,
-                            TransactionType = TransactionType.Internal,
-                            TransactionId = transactionId.Id,
-                            TransactionToken = token.Token,
-                            ShipmentTypeId = input.ShipmentTypeId,
-                            BranchSrcId = (await _branch.GetNearestByLocation(input.SenderLocation)).Id,
-                            BranchDstId = (await _branch.GetNearestByLocation(input.ReceiverLocation)).Id,
-                        };
-
-                        var shipmentResult = await _shipment.Insert(shipment);
-
-                        return Ok(
-                            new ReturnSuccessDto<ShipmentInternalOutput>
-                            {
-                                data = new ShipmentInternalOutput
-                                {
-                                    ShipmentId = shipmentResult.Id,
-                                    StatusOrder = shipment.Status.ToString()
-                                }
-                            }
-                        );
-                    }
-                    else
-                    {
-                        return BadRequest(
-                            new ReturnErrorDto
-                            {
-                                message = ""
-                            }
-                        );
-                    }
-                }
-                else
+                var loginUser = new LoginUserInput
                 {
-                    return NotFound(
-                        new ReturnErrorDto
-                        {
+                    Username = input.UserCredential.UangTransUsername,
+                    Password = input.UserCredential.UangTransPassword
+                };
+                var token = await _uangTrans.LoginUser(loginUser);
+                var customerId = await _uangTrans.GetProfile(token.Token);
 
+                var inputHttp = new TransferBalanceDto
+                {
+                    CustomerDebitId = customerId.Id,
+                    Amount = fee,
+                    CustomerCreditId = 5 //5 is AnterAja Id in UangTrans Service
+                };
+
+                var httpRequest = await _uangTrans.CreateShipmentInternal(inputHttp, token.Token);
+
+                if (!httpRequest.Succeed)
+                    return BadRequest(new ReturnErrorDto { message = httpRequest.Message });
+
+                var transactionInternal = new TransactionInternal
+                {
+                    Product = input.Product,
+                    PaymentId = 0 //TODO Update PaymentId from UangTrans
+                };
+                var transactionId = await _transactionInternal.Insert(transactionInternal);
+
+                var shipment = new Shipment
+                {
+                    SenderName = input.SenderName,
+                    SenderContact = input.SenderContact,
+                    SenderAddress = new Point(input.SenderLocation.Longitude, input.SenderLocation.Latitude) { SRID = 4326 },
+                    ReceiverName = input.ReceiverName,
+                    ReceiverContact = input.ReceiverContact,
+                    ReceiverAddress = new Point(input.ReceiverLocation.Longitude, input.ReceiverLocation.Latitude) { SRID = 4326 },
+                    TotalWeight = input.TotalWeight,
+                    Cost = fee,
+                    Status = Status.OrderReceived,
+                    TransactionType = TransactionType.Internal,
+                    TransactionId = transactionId.Id,
+                    TransactionToken = token.Token,
+                    ShipmentTypeId = input.ShipmentTypeId,
+                    BranchSrcId = (await _branch.GetNearestByLocation(input.SenderLocation)).Id,
+                    BranchDstId = (await _branch.GetNearestByLocation(input.ReceiverLocation)).Id,
+                };
+
+                var shipmentResult = await _shipment.Insert(shipment);
+
+                return Ok(
+                    new ReturnSuccessDto<ShipmentInternalOutputDto>
+                    {
+                        data = new ShipmentInternalOutputDto
+                        {
+                            ShipmentId = shipmentResult.Id,
+                            StatusOrder = shipment.Status.ToString()
                         }
-                    );
-                }
+                    }
+                );
             }
             catch (Exception ex)
             {
@@ -235,12 +214,12 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<ReturnSuccessDto<IEnumerable<DtoShipmentOutput>>>> GetAllShipment()
+        public async Task<ActionResult<ReturnSuccessDto<IEnumerable<ShipmentOutputDto>>>> GetAllShipment()
         {
             var result = await _shipment.GetAll();
-            var dtos = _mapper.Map<IEnumerable<DtoShipmentOutput>>(result);
+            var dtos = _mapper.Map<IEnumerable<ShipmentOutputDto>>(result);
             return Ok(
-                new ReturnSuccessDto<IEnumerable<DtoShipmentOutput>>
+                new ReturnSuccessDto<IEnumerable<ShipmentOutputDto>>
                 {
                     data = dtos
                 }
@@ -248,34 +227,56 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReturnSuccessDto<DtoShipmentOutput>>> GetShipmentById(int id)
+        public async Task<ActionResult<ReturnSuccessDto<ShipmentOutputDto>>> GetShipmentById(int id)
         {
-            var result = await _shipment.GetById(id);
-            if (result == null)
-                return NotFound();
+            try
+            {
+                var result = await _shipment.GetById(id);
 
-            return Ok(
-                new ReturnSuccessDto<DtoShipmentOutput>
-                {
-                    data = _mapper.Map<DtoShipmentOutput>(result)
-                }
-            );
+                return Ok(
+                    new ReturnSuccessDto<ShipmentOutputDto>
+                    {
+                        data = _mapper.Map<ShipmentOutputDto>(result)
+                    }
+                );
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
+            }
         }
 
         [AllowAnonymous]
         [HttpGet("{id}/Status")]
-        public async Task<ActionResult<ReturnSuccessDto<DtoStatus>>> GetShipmentStatus(int id)
+        public async Task<ActionResult<ReturnSuccessDto<StatusOutputDto>>> GetShipmentStatus(int id)
         {
-            var result = await _shipment.GetById(id);
-            if (result == null)
-                return NotFound();
+            try
+            {
+                var result = await _shipment.GetById(id);
 
-            return Ok(
-                new ReturnSuccessDto<DtoStatus>
-                {
-                    data = _mapper.Map<DtoStatus>(result)
-                }
-            );
+                return Ok(
+                    new ReturnSuccessDto<StatusOutputDto>
+                    {
+                        data = _mapper.Map<StatusOutputDto>(result)
+                    }
+                );
+            }
+            catch (System.Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return BadRequest(
+                    new ReturnErrorDto
+                    {
+                        message = ex.Message
+                    }
+                );
+            }
         }
 
         [Authorize(Roles = "Admin, Tokopodia")]
@@ -287,7 +288,7 @@ namespace DiAnterExpress.Controllers
                 var shipmentType = await _shipmentType.GetById(input.shipmentTypeId);
 
                 var totalFee = await _shipment.GetShipmentFee(
-                    new ShipmentFeeInput
+                    new ShipmentFeeInsertDto
                     {
                         SenderLat = input.senderLat,
                         SenderLong = input.senderLong,
@@ -357,7 +358,7 @@ namespace DiAnterExpress.Controllers
         }
 
         [HttpPatch("{id}/Status/{status}")]
-        public async Task<ActionResult<ReturnSuccessDto<DtoStatus>>> UpdateShipmentStatus(int id, Status status)
+        public async Task<ActionResult<ReturnSuccessDto<StatusOutputDto>>> UpdateShipmentStatus(int id, Status status)
         {
             try
             {
@@ -402,7 +403,7 @@ namespace DiAnterExpress.Controllers
                 {
                     await _tokopodia.TransactionUpdateStatus(shipment.TransactionId, shipment.TransactionToken);
 
-                    var userToken = await _http.LoginUser(
+                    var userToken = await _uangTrans.LoginUser(
                         new LoginUserInput
                         {
                             // TODO move credentials to appsetting?
@@ -411,13 +412,13 @@ namespace DiAnterExpress.Controllers
                         }
                     );
 
-                    await _http.UpdateStatusTransaction(shipment.TransactionId, userToken.Token);
+                    await _uangTrans.UpdateStatusTransaction(shipment.TransactionId, userToken.Token);
                 }
 
                 return Ok(
-                    new ReturnSuccessDto<DtoStatus>
+                    new ReturnSuccessDto<StatusOutputDto>
                     {
-                        data = new DtoStatus
+                        data = new StatusOutputDto
                         {
                             Id = shipment.Id,
                             Status = result.Status.ToString(),

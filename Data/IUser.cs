@@ -15,6 +15,6 @@ namespace DiAnterExpress.Data
         IEnumerable<ApplicationUser> GetAllUser();
         Task<ApplicationUser> GetByUserId(string userId);
         Task<IList<string>> GetRolesByUsername(string username);
-        Task<ApplicationUser> Insert(DtoUserRegister input);   
+        Task<ApplicationUser> Insert(UserInsertDto input);
     }
 }

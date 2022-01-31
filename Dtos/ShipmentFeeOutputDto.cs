@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DiAnterExpress.Models
+namespace DiAnterExpress.Dtos
 {
-    public class ShipmentTransaction
+    public class ShipmentFeeOutputDto
     {
-
+        public double Fee { get; set; }
     }
 }

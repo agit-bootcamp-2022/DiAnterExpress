@@ -6,8 +6,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using DiAnterExpress.Dtos;
-using DiAnterExpress.Models;
+using DiAnterExpress.Externals.Dtos;
 using GraphQL;
 using GraphQL.Client.Abstractions;
 using GraphQL.Client.Http;
@@ -15,14 +14,14 @@ using GraphQL.Client.Serializer.Newtonsoft;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
-namespace DiAnterExpress.SyncDataServices.Http
+namespace DiAnterExpress.Externals
 {
-    public class HttpShipmentInternalDataClient : IShipmentInternalDataClient
+    public class UangTransDataClient : IUangTransDataClient
     {
         private readonly GraphQLHttpClient _client;
         private readonly IConfiguration _configuration;
 
-        public HttpShipmentInternalDataClient(IConfiguration configuration)
+        public UangTransDataClient(IConfiguration configuration)
         {
             _configuration = configuration;
 
